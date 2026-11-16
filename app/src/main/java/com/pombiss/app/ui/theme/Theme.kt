@@ -5,23 +5,27 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val PomBissColorScheme = darkColorScheme(
-    primary = NeonBlue,
-    secondary = NeonGreen,
-    tertiary = NeonPink,
-    background = DarkBackground,
-    surface = SurfaceDark,
-    onPrimary = TextWhite,
-    onSecondary = Color.Black,
-    onTertiary = TextWhite,
-    onBackground = TextWhite,
-    onSurface = TextWhite,
-)
-
 @Composable
-fun PomBissTheme(content: @Composable () -> Unit) {
+fun PomBissTheme(
+    primaryColor: Color = NeonBlue,
+    accentColor: Color = NeonGreen,
+    content: @Composable () -> Unit
+) {
+    val colorScheme = darkColorScheme(
+        primary = primaryColor,
+        secondary = accentColor,
+        tertiary = NeonPink,
+        background = DarkBackground,
+        surface = SurfaceDark,
+        onPrimary = TextWhite,
+        onSecondary = Color.Black,
+        onTertiary = TextWhite,
+        onBackground = TextWhite,
+        onSurface = TextWhite,
+    )
+
     MaterialTheme(
-        colorScheme = PomBissColorScheme,
+        colorScheme = colorScheme,
         content = content
     )
 }
