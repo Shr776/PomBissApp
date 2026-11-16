@@ -24,13 +24,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun FeedListScreen(
     repository: FeedRepository,
-    onFeedClick: (Feed) -> Unit
+    onFeedClick: (Feed) -> Unit,
+    onSettingsClick: () -> Unit // پارامتر جدید برای رفتن به تنظیمات
 ) {
     var feeds by remember { mutableStateOf<List<Feed>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
     
-    // وضعیت‌های مربوط به جستجو
     var showSearchBar by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
 
@@ -54,7 +54,6 @@ fun FeedListScreen(
         loadFeeds(false)
     }
 
-    // فیلتر کردن لیست بر اساس متن جستجو
     val filteredFeeds = if (searchQuery.isBlank()) {
         feeds
     } else {
@@ -76,11 +75,11 @@ fun FeedListScreen(
             onRefreshClick = { loadFeeds(true) },
             onSearchClick = { 
                 showSearchBar = !showSearchBar 
-                if (!showSearchBar) searchQuery = "" // وقتی بسته شد، متن پاک بشه
-            }
+                if (!showSearchBar) searchQuery = ""
+            },
+            onSettingsClick = onSettingsClick // وصل کردن دکمه تنظیمات به هدر
         )
 
-        // نوار جستجو (فقط وقتی آیکون ذره‌بین زده میشه نمایش داده میشه)
         if (showSearchBar) {
             OutlinedTextField(
                 value = searchQuery,
@@ -128,7 +127,6 @@ fun FeedListScreen(
                         FeedCard(feed = feed, onClick = { onFeedClick(feed) })
                     }
                     
-                    // فوتر تبلیغاتی
                     item {
                         Spacer(modifier = Modifier.height(24.dp))
                         Text(
