@@ -23,15 +23,21 @@ object LicenseManager {
         return android.os.Build.MODEL ?: "Unknown"
     }
 
-    // گرفتن برند گوشی
     fun getDeviceBrand(): String {
         return android.os.Build.BRAND ?: "Unknown"
     }
 
-    suspend fun registerDeviceOnServer(context: Context) = withContext(Dispatchers.IO) {
+    // تابع جدید برای ثبت‌نام با تمام اطلاعات
+    suspend fun registerDeviceWithDetails(
+        context: Context,
+        country: String,
+        phoneModel: String,
+        receiverModel: String,
+        age: String,
+        gender: String
+    ) = withContext(Dispatchers.IO) {
         val deviceId = getDeviceId(context)
-        val model = getDeviceModel()
-        val brand = getDeviceBrand() // گرفتن برند
+        val brand = getDeviceBrand()
 
         try {
             val conn = URL(SCRIPT_URL).openConnection() as HttpURLConnection
@@ -44,8 +50,12 @@ object LicenseManager {
             val jsonParam = JSONObject()
             jsonParam.put("action", "register")
             jsonParam.put("deviceId", deviceId)
-            jsonParam.put("model", model)
-            jsonParam.put("brand", brand) // ارسال برند به سرور
+            jsonParam.put("brand", brand)
+            jsonParam.put("phoneModel", phoneModel)
+            jsonParam.put("country", country)
+            jsonParam.put("receiverModel", receiverModel)
+            jsonParam.put("age", age)
+            jsonParam.put("gender", gender)
 
             val os = conn.outputStream
             os.write(jsonParam.toString().toByteArray(Charsets.UTF_8))
