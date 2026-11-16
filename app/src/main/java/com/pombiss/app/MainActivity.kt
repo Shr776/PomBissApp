@@ -7,9 +7,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.pombiss.app.data.Feed
 import com.pombiss.app.data.FeedRepository
 import com.pombiss.app.ui.screens.FeedDetailScreen
@@ -22,31 +19,22 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             PomBissTheme {
-                val navController = rememberNavController()
+                // این دو خط جدید جایگزین NavController شدن
+                var selectedFeed by remember { mutableStateOf<Feed?>(null) }
                 val repository = remember { FeedRepository(applicationContext) }
 
-                NavHost(
-                    navController = navController,
-                    startDestination = "list",
-                    modifier = Modifier.fillMaxSize().background(DarkBackground)
-                ) {
-                    composable("list") {
-                        FeedListScreen(
-                            repository = repository,
-                            onFeedClick = { feed ->
-                                // برای سادگی، اطلاعات فید رو به صورت موقت نگه می‌داریم
-                                // در نسخه‌های بعدی می‌شه از State بهتری استفاده کرد
-                                navController.currentBackStackEntry?.savedStateHandle?.set("feed", feed)
-                                navController.navigate("detail")
-                            }
-                        )
-                    }
-                    composable("detail") {
-                        val feed = navController.previousBackStackEntry?.savedStateHandle?.get<Feed>("feed")
-                        if (feed != null) {
-                            FeedDetailScreen(feed = feed, onBack = { navController.popBackStack() })
+                if (selectedFeed == null) {
+                    FeedListScreen(
+                        repository = repository,
+                        onFeedClick = { feed ->
+                            selectedFeed = feed // با کلیک، فید انتخاب میشه
                         }
-                    }
+                    )
+                } else {
+                    FeedDetailScreen(
+                        feed = selectedFeed!!,
+                        onBack = { selectedFeed = null } // با زدن دکمه برگشت، فید صفر میشه
+                    )
                 }
             }
         }
