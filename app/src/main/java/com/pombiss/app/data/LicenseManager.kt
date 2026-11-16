@@ -5,10 +5,14 @@ import android.provider.Settings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 
 object LicenseManager {
+
+    private const val SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlckeyeshqWrLzjUTderETd2iDMfN77ca1LeXXsFz9JI5ZijPiT0o9FiruyBhXb2o/exec"
 
     fun getDeviceId(context: Context): String {
         val androidId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
@@ -19,18 +23,19 @@ object LicenseManager {
         return android.os.Build.MODEL ?: "Unknown"
     }
 
+    // ثبت نام اولیه در سرور
     suspend fun registerDeviceOnServer(context: Context) = withContext(Dispatchers.IO) {
-        val url = URL("https://script.google.com/macros/s/AKfycbwlckeyeshqWrLzjUTderETd2iDMfN77ca1LeXXsFz9JI5ZijPiT0o9FiruyBhXb2o/exec")
         val deviceId = getDeviceId(context)
         val model = getDeviceModel()
 
         try {
-            val conn = url.openConnection() as HttpURLConnection
+            val conn = URL(SCRIPT_URL).openConnection() as HttpURLConnection
             conn.requestMethod = "POST"
             conn.doOutput = true
             conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
 
             val jsonParam = JSONObject()
+            jsonParam.put("action", "register") // نوع درخواست
             jsonParam.put("deviceId", deviceId)
             jsonParam.put("model", model)
 
@@ -44,6 +49,47 @@ object LicenseManager {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    // چک کردن وضعیت تایید (آیا ادمین تایید کرده یا نه)
+    suspend fun checkUserStatus(context: Context): Boolean = withContext(Dispatchers.IO) {
+        val deviceId = getDeviceId(context)
+        try {
+            val conn = URL(SCRIPT_URL).openConnection() as HttpURLConnection
+            conn.requestMethod = "POST"
+            conn.doOutput = true
+            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
+
+            val jsonParam = JSONObject()
+            jsonParam.put("action", "checkStatus") // نوع درخواست
+            jsonParam.put("deviceId", deviceId)
+
+            val os = conn.outputStream
+            os.write(jsonParam.toString().toByteArray(Charsets.UTF_8))
+            os.flush()
+            os.close()
+
+            val responseCode = conn.responseCode
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                val reader = BufferedReader(InputStreamReader(conn.inputStream))
+                val response = StringBuilder()
+                var line: String?
+                while (reader.readLine().also { line = it } != null) {
+                    response.append(line)
+                }
+                reader.close()
+                
+                val jsonResponse = JSONObject(response.toString())
+                val userStatus = jsonResponse.optString("userStatus", "not_found")
+                
+                conn.disconnect()
+                return@withContext userStatus.equals("active", ignoreCase = true)
+            }
+            conn.disconnect()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return@withContext false
     }
 
     fun saveActivation(context: Context, isActivated: Boolean) {
