@@ -14,10 +14,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.pombiss.app.data.Feed
 import com.pombiss.app.data.FeedRepository
 import com.pombiss.app.data.LicenseManager
-import com.pombiss.app.ui.screens.ActivationScreen
-import com.pombiss.app.ui.screens.FeedDetailScreen
-import com.pombiss.app.ui.screens.FeedListScreen
-import com.pombiss.app.ui.screens.PendingScreen
+import com.pombiss.app.ui.screens.*
 import com.pombiss.app.ui.theme.*
 import kotlinx.coroutines.launch
 
@@ -27,13 +24,29 @@ class MainActivity : ComponentActivity() {
         setContent {
             val context = LocalContext.current
             
-            // گرفتن تم فعلی
+            // وضعیت تم فعلی
             var currentTheme by remember { mutableStateOf(ThemeManager.getSelectedTheme(context)) }
+            
+            // وضعیت باز بودن صفحه تنظیمات
+            var showSettings by remember { mutableStateOf(false) }
 
             PomBissTheme(
                 primaryColor = currentTheme.primary,
                 accentColor = currentTheme.accent
             ) {
+                // اگه صفحه تنظیمات باز بود، اون رو نشون بده
+                if (showSettings) {
+                    SettingsScreen(
+                        currentThemeId = currentTheme.id,
+                        onThemeSelected = { themeId ->
+                            ThemeManager.saveTheme(context, themeId)
+                            currentTheme = ThemeManager.getSelectedTheme(context) // آپدیت تم در لحظه
+                        },
+                        onBack = { showSettings = false }
+                    )
+                    return@PomBissTheme // بقیه کدها اجرا نشن
+                }
+
                 var appState by remember { mutableStateOf(3) }
                 var selectedFeed by remember { mutableStateOf<Feed?>(null) }
                 val repository = remember { FeedRepository(applicationContext) }
@@ -77,7 +90,8 @@ class MainActivity : ComponentActivity() {
                         if (selectedFeed == null) {
                             FeedListScreen(
                                 repository = repository,
-                                onFeedClick = { feed -> selectedFeed = feed }
+                                onFeedClick = { feed -> selectedFeed = feed },
+                                onSettingsClick = { showSettings = true } // رفتن به تنظیمات
                             )
                         } else {
                             FeedDetailScreen(
