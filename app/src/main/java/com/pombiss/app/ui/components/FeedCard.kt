@@ -1,18 +1,20 @@
 package com.pombiss.app.ui.components
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,6 +23,8 @@ import com.pombiss.app.ui.theme.*
 
 @Composable
 fun FeedCard(feed: Feed, onClick: () -> Unit) {
+    val context = LocalContext.current
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -31,63 +35,81 @@ fun FeedCard(feed: Feed, onClick: () -> Unit) {
         border = BorderStroke(1.dp, NeonBlue.copy(alpha = 0.3f))
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
-            // فرکانس، SR و پلاریزاسیون (بزرگ و برجسته)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = feed.freq,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = NeonYellow
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "•", color = TextGray)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = feed.sr,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = NeonCyan
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "•", color = TextGray)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = feed.pol,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = NeonGreen
-                )
-            }
             
-            Spacer(modifier = Modifier.height(6.dp))
-            
-            // اسم فید
+            // ۱. اسم ماهواره (بالاتر از همه)
             Text(
-                text = if (feed.feedId.isNotBlank()) feed.feedId else "Unknown Feed",
-                fontSize = 18.sp,
+                text = feed.sat,
+                fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextWhite
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            
+            // ۲. مشخصات فرکانس، SR و پلاریزاسیون
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = feed.freq, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = NeonYellow)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "•", color = TextGray)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = feed.sr, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = NeonCyan)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "•", color = TextGray)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = feed.pol, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = NeonGreen)
+            }
+            
+            Spacer(modifier = Modifier.height(4.dp))
+            
+            // ۳. اسم فید
+            Text(
+                text = if (feed.feedId.isNotBlank()) feed.feedId else feed.title,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = NeonBlue
             )
             
             Spacer(modifier = Modifier.height(6.dp))
             
-            // فرمت و تاریخ (کوچک‌تر)
+            // ۴. ردیف کد فید و دکمه کپی و تاریخ
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = feed.type,
-                    fontSize = 14.sp,
-                    color = NeonOrange,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = feed.datetime,
-                    fontSize = 12.sp,
-                    color = TextGray
-                )
+                // بخش کد فید و دکمه کپی
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = feed.cw,
+                        fontSize = 14.sp,
+                        color = NeonOrange,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    IconButton(
+                        onClick = {
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            val clip = ClipData.newPlainText("Feed Info", feed.toShareString())
+                            clipboard.setPrimaryClip(clip)
+                            Toast.makeText(context, "اطلاعات فید کپی شد!", Toast.LENGTH_SHORT).show()
+                        },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ContentCopy,
+                            contentDescription = "Copy",
+                            tint = NeonGreen,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+
+                // تاریخ
+                Text(text = feed.datetime, fontSize = 12.sp, color = TextGray)
             }
+            
+            // فرمت فید
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = feed.type, fontSize = 13.sp, color = TextGray)
         }
     }
 }
