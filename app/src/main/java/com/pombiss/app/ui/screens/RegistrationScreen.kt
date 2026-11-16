@@ -32,12 +32,12 @@ fun RegistrationScreen(
     var country by remember { mutableStateOf("") }
     var phoneModel by remember { mutableStateOf(LicenseManager.getDeviceModel()) }
     
-    // متغیرهای مربوط به رسیور
+    // برند و مدل رسیور
     var selectedBrand by remember { mutableStateOf("") }
+    var customBrand by remember { mutableStateOf("") }
     var selectedModel by remember { mutableStateOf("") }
     var customModel by remember { mutableStateOf("") }
     
-    // متغیرهای مربوط به ایمیج
     var selectedImage by remember { mutableStateOf("") }
     var customImage by remember { mutableStateOf("") }
 
@@ -59,16 +59,25 @@ fun RegistrationScreen(
         "Egami", "Pure2", "OpenBH", "OpenSpa", "Other (Type manually...)"
     )
 
-    // دیکشنری برندها و مدل‌ها
+    // لیست کامل‌تر برندها و مدل‌ها
     val brandModels = mapOf(
-        "Vu+" to listOf("Zero", "Solo2", "Duo2", "Uno4K SE", "Duo4K SE", "Zero 4K", "Other"),
+        "Vu+" to listOf("Zero", "Solo2", "Duo2", "Duo4K", "Duo4K SE", "Uno4K SE", "Zero 4K", "Uno", "Solo 4K", "Ultimo 4K", "Other"),
         "Dreambox" to listOf("DM500", "DM800", "DM8000", "DM900", "DM920", "One", "Two", "Other"),
         "Gigablue" to listOf("HD X1", "HD X2", "UHD UE 4K", "UHD Quad 4K", "UHD Trio 4K", "Other"),
-        "Octagon" to listOf("SF8008", "SF8008 Twin", "SF4008", "SX88", "Other"),
+        "Octagon" to listOf("SF8008", "SF8008 Twin", "SF4008", "SX88", "SX988", "Other"),
         "Zgemma" to listOf("H9", "H9S", "H9T", "H7", "H7S", "H11", "Other"),
         "Mutant" to listOf("HD51", "HD60", "HD66", "Other"),
-        "Other" to listOf("Other")
+        "Titan" to listOf("Titan 4K", "Other"),
+        "Other (Type manually...)" to listOf("Other")
     )
+
+    // بررسی اینکه آیا همه فیلدها پر شده‌اند یا نه
+    val isFormValid = country.isNotEmpty() && 
+                      gender.isNotEmpty() && 
+                      age.isNotEmpty() &&
+                      (selectedBrand.isNotEmpty() || customBrand.isNotEmpty()) && 
+                      (selectedModel.isNotEmpty() || customModel.isNotEmpty()) && 
+                      (selectedImage.isNotEmpty() || customImage.isNotEmpty())
 
     Column(
         modifier = Modifier
@@ -104,7 +113,7 @@ fun RegistrationScreen(
                 value = country,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Country", color = TextGray) },
+                label = { Text("Country *", color = TextGray) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = countryExpanded) },
                 colors = OutlinedTextFieldDefaults.colors(focusedTextColor = TextWhite, unfocusedTextColor = TextWhite),
                 modifier = Modifier.fillMaxWidth().menuAnchor()
@@ -120,7 +129,7 @@ fun RegistrationScreen(
         }
         Spacer(modifier = Modifier.height(12.dp))
 
-        // ۲. مدل گوشی (خودکار)
+        // ۲. مدل گوشی
         OutlinedTextField(
             value = phoneModel,
             onValueChange = { phoneModel = it },
@@ -139,7 +148,7 @@ fun RegistrationScreen(
                 value = selectedBrand,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Receiver Brand", color = TextGray) },
+                label = { Text("Receiver Brand *", color = TextGray) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = brandExpanded) },
                 colors = OutlinedTextFieldDefaults.colors(focusedTextColor = TextWhite, unfocusedTextColor = TextWhite),
                 modifier = Modifier.fillMaxWidth().menuAnchor()
@@ -150,15 +159,28 @@ fun RegistrationScreen(
                         selectedBrand = brand
                         selectedModel = "" 
                         customModel = ""
+                        if (brand != "Other (Type manually...)") customBrand = ""
                         brandExpanded = false
                     })
                 }
             }
         }
+        
+        // کادر تایپ دستی برند (اگه گزینه Other انتخاب شد)
+        if (selectedBrand == "Other (Type manually...)") {
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = customBrand,
+                onValueChange = { customBrand = it },
+                label = { Text("Type your receiver brand *", color = TextGray) },
+                colors = OutlinedTextFieldDefaults.colors(focusedTextColor = TextWhite, unfocusedTextColor = TextWhite),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
         Spacer(modifier = Modifier.height(12.dp))
 
         // ۴. مدل رسیور
-        if (selectedBrand.isNotEmpty()) {
+        if (selectedBrand.isNotEmpty() && selectedBrand != "Other (Type manually...)") {
             val availableModels = brandModels[selectedBrand] ?: listOf("Other")
             
             ExposedDropdownMenuBox(
@@ -169,7 +191,7 @@ fun RegistrationScreen(
                     value = selectedModel,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Receiver Model", color = TextGray) },
+                    label = { Text("Receiver Model *", color = TextGray) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = modelExpanded) },
                     colors = OutlinedTextFieldDefaults.colors(focusedTextColor = TextWhite, unfocusedTextColor = TextWhite),
                     modifier = Modifier.fillMaxWidth().menuAnchor()
@@ -188,18 +210,18 @@ fun RegistrationScreen(
         }
 
         // کادر تایپ دستی مدل رسیور
-        if (selectedBrand == "Other" || selectedModel == "Other") {
+        if (selectedModel == "Other" || selectedBrand == "Other (Type manually...)") {
             OutlinedTextField(
                 value = customModel,
                 onValueChange = { customModel = it },
-                label = { Text("Type your receiver model", color = TextGray) },
+                label = { Text("Type your receiver model *", color = TextGray) },
                 colors = OutlinedTextFieldDefaults.colors(focusedTextColor = TextWhite, unfocusedTextColor = TextWhite),
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))
         }
 
-        // ۵. ایمیج انیگما (لیست + تایپ دستی)
+        // ۵. ایمیج انیگما
         ExposedDropdownMenuBox(
             expanded = imageExpanded,
             onExpandedChange = { imageExpanded = !imageExpanded }
@@ -208,7 +230,7 @@ fun RegistrationScreen(
                 value = selectedImage,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Enigma2 Image", color = TextGray) },
+                label = { Text("Enigma2 Image *", color = TextGray) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = imageExpanded) },
                 colors = OutlinedTextFieldDefaults.colors(focusedTextColor = TextWhite, unfocusedTextColor = TextWhite),
                 modifier = Modifier.fillMaxWidth().menuAnchor()
@@ -230,7 +252,7 @@ fun RegistrationScreen(
             OutlinedTextField(
                 value = customImage,
                 onValueChange = { customImage = it },
-                label = { Text("Type your image name", color = TextGray) },
+                label = { Text("Type your image name *", color = TextGray) },
                 colors = OutlinedTextFieldDefaults.colors(focusedTextColor = TextWhite, unfocusedTextColor = TextWhite),
                 modifier = Modifier.fillMaxWidth()
             )
@@ -241,7 +263,7 @@ fun RegistrationScreen(
         OutlinedTextField(
             value = age,
             onValueChange = { age = it },
-            label = { Text("Age", color = TextGray) },
+            label = { Text("Age *", color = TextGray) },
             colors = OutlinedTextFieldDefaults.colors(focusedTextColor = TextWhite, unfocusedTextColor = TextWhite),
             modifier = Modifier.fillMaxWidth()
         )
@@ -256,7 +278,7 @@ fun RegistrationScreen(
                 value = gender,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Gender", color = TextGray) },
+                label = { Text("Gender *", color = TextGray) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = genderExpanded) },
                 colors = OutlinedTextFieldDefaults.colors(focusedTextColor = TextWhite, unfocusedTextColor = TextWhite),
                 modifier = Modifier.fillMaxWidth().menuAnchor()
@@ -272,17 +294,18 @@ fun RegistrationScreen(
         }
         Spacer(modifier = Modifier.height(24.dp))
 
-        // دکمه ثبت‌نام
+        // دکمه ثبت‌نام (تا وقتی همه فیلدها پر نشن غیرفعاله)
         Button(
             onClick = {
                 isLoading = true
                 scope.launch {
                     try {
-                        val finalReceiverModel = if (selectedModel == "Other") customModel else selectedModel
+                        val finalBrand = if (selectedBrand == "Other (Type manually...)") customBrand else selectedBrand
+                        val finalModel = if (selectedModel == "Other" || selectedBrand == "Other (Type manually...)") customModel else selectedModel
                         val finalImage = if (selectedImage == "Other (Type manually...)") customImage else selectedImage
                         
                         LicenseManager.registerDeviceWithDetails(
-                            context, country, phoneModel, "$selectedBrand $finalReceiverModel", finalImage, age, gender
+                            context, country, phoneModel, "$finalBrand $finalModel", finalImage, age, gender
                         )
                         onRegistrationSuccess()
                     } catch (e: Exception) {
@@ -291,9 +314,11 @@ fun RegistrationScreen(
                 }
             },
             modifier = Modifier.fillMaxWidth().height(56.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (isFormValid) MaterialTheme.colorScheme.primary else Color.Gray
+            ),
             shape = RoundedCornerShape(12.dp),
-            enabled = !isLoading && country.isNotEmpty() && gender.isNotEmpty() && selectedBrand.isNotEmpty() && (selectedModel.isNotEmpty() || customModel.isNotEmpty()) && (selectedImage.isNotEmpty() || customImage.isNotEmpty())
+            enabled = !isLoading && isFormValid
         ) {
             if (isLoading) {
                 CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
