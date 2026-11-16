@@ -9,6 +9,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.pombiss.app.data.Feed
 import com.pombiss.app.data.FeedRepository
+import com.pombiss.app.data.LicenseManager
+import com.pombiss.app.ui.screens.ActivationScreen
 import com.pombiss.app.ui.screens.FeedDetailScreen
 import com.pombiss.app.ui.screens.FeedListScreen
 import com.pombiss.app.ui.theme.DarkBackground
@@ -19,22 +21,33 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             PomBissTheme {
-                // این دو خط جدید جایگزین NavController شدن
+                // وضعیت قفل: آیا کاربر تایید شده یا نه؟
+                var isActivated by remember { mutableStateOf(LicenseManager.isActivated(applicationContext)) }
                 var selectedFeed by remember { mutableStateOf<Feed?>(null) }
                 val repository = remember { FeedRepository(applicationContext) }
 
-                if (selectedFeed == null) {
-                    FeedListScreen(
-                        repository = repository,
-                        onFeedClick = { feed ->
-                            selectedFeed = feed // با کلیک، فید انتخاب میشه
+                if (!isActivated) {
+                    // اگر فعال نشده بود، صفحه قفل رو نشون بده
+                    ActivationScreen(
+                        onActivationSuccess = {
+                            isActivated = true // بعد از موفقیت، میره به صفحه اصلی
                         }
                     )
                 } else {
-                    FeedDetailScreen(
-                        feed = selectedFeed!!,
-                        onBack = { selectedFeed = null } // با زدن دکمه برگشت، فید صفر میشه
-                    )
+                    // اگر فعال بود (یا بعد از فعال شدن)، برنامه اصلی رو نشون بده
+                    if (selectedFeed == null) {
+                        FeedListScreen(
+                            repository = repository,
+                            onFeedClick = { feed ->
+                                selectedFeed = feed
+                            }
+                        )
+                    } else {
+                        FeedDetailScreen(
+                            feed = selectedFeed!!,
+                            onBack = { selectedFeed = null }
+                        )
+                    }
                 }
             }
         }
