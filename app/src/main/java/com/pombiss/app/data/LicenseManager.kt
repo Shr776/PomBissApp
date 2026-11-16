@@ -29,10 +29,11 @@ object LicenseManager {
 
     suspend fun registerDeviceWithDetails(
         context: Context,
+        username: String, // پارامتر جدید
         country: String,
         phoneModel: String,
         receiverModel: String,
-        imageName: String, // پارامتر جدید
+        imageName: String,
         age: String,
         gender: String
     ) = withContext(Dispatchers.IO) {
@@ -51,10 +52,11 @@ object LicenseManager {
             jsonParam.put("action", "register")
             jsonParam.put("deviceId", deviceId)
             jsonParam.put("brand", brand)
+            jsonParam.put("username", username) // ارسال نام کاربری
             jsonParam.put("phoneModel", phoneModel)
             jsonParam.put("country", country)
             jsonParam.put("receiverModel", receiverModel)
-            jsonParam.put("imageName", imageName) // ارسال ایمیج
+            jsonParam.put("imageName", imageName)
             jsonParam.put("age", age)
             jsonParam.put("gender", gender)
 
