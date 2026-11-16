@@ -58,3 +58,4 @@ val Graphite_Accent = Color(0xFFCFD8E6)
 // 10. Lime Neon
 val Lime_Primary = Color(0xFFB6F23D)
 val Lime_Accent = Color(0xFFDCFF8A)
+val NeonCyan = Color(0xFF00FFFF)
