@@ -3,17 +3,14 @@ package com.pombiss.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
 import com.pombiss.app.data.Feed
 import com.pombiss.app.data.FeedRepository
 import com.pombiss.app.data.LicenseManager
 import com.pombiss.app.ui.screens.ActivationScreen
 import com.pombiss.app.ui.screens.FeedDetailScreen
 import com.pombiss.app.ui.screens.FeedListScreen
-import com.pombiss.app.ui.theme.DarkBackground
+import com.pombiss.app.ui.screens.PendingScreen
 import com.pombiss.app.ui.theme.PomBissTheme
 
 class MainActivity : ComponentActivity() {
@@ -21,32 +18,45 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             PomBissTheme {
-                // وضعیت قفل: آیا کاربر تایید شده یا نه؟
-                var isActivated by remember { mutableStateOf(LicenseManager.isActivated(applicationContext)) }
+                // وضعیت‌ها: 0 = صفحه فعال‌سازی، 1 = صفحه انتظار، 2 = برنامه اصلی
+                var appState by remember { 
+                    mutableStateOf(if (LicenseManager.isActivated(applicationContext)) 2 else 0) 
+                }
                 var selectedFeed by remember { mutableStateOf<Feed?>(null) }
                 val repository = remember { FeedRepository(applicationContext) }
 
-                if (!isActivated) {
-                    // اگر فعال نشده بود، صفحه قفل رو نشون بده
-                    ActivationScreen(
-                        onActivationSuccess = {
-                            isActivated = true // بعد از موفقیت، میره به صفحه اصلی
-                        }
-                    )
-                } else {
-                    // اگر فعال بود (یا بعد از فعال شدن)، برنامه اصلی رو نشون بده
-                    if (selectedFeed == null) {
-                        FeedListScreen(
-                            repository = repository,
-                            onFeedClick = { feed ->
-                                selectedFeed = feed
+                when (appState) {
+                    0 -> {
+                        // صفحه فعال‌سازی
+                        ActivationScreen(
+                            onActivationSuccess = {
+                                appState = 1 // بعد از زدن دکمه، برو به صفحه انتظار
                             }
                         )
-                    } else {
-                        FeedDetailScreen(
-                            feed = selectedFeed!!,
-                            onBack = { selectedFeed = null }
+                    }
+                    1 -> {
+                        // صفحه انتظار برای تایید
+                        PendingScreen(
+                            onApproved = {
+                                // اگر ادمین تایید کرد، وضعیت رو ذخیره کن و برو به برنامه اصلی
+                                LicenseManager.saveActivation(applicationContext, true)
+                                appState = 2 
+                            }
                         )
+                    }
+                    2 -> {
+                        // برنامه اصلی (لیست فیدها)
+                        if (selectedFeed == null) {
+                            FeedListScreen(
+                                repository = repository,
+                                onFeedClick = { feed -> selectedFeed = feed }
+                            )
+                        } else {
+                            FeedDetailScreen(
+                                feed = selectedFeed!!,
+                                onBack = { selectedFeed = null }
+                            )
+                        }
                     }
                 }
             }
