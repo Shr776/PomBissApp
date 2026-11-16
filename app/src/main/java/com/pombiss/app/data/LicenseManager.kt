@@ -27,12 +27,12 @@ object LicenseManager {
         return android.os.Build.BRAND ?: "Unknown"
     }
 
-    // تابع جدید برای ثبت‌نام با تمام اطلاعات
     suspend fun registerDeviceWithDetails(
         context: Context,
         country: String,
         phoneModel: String,
         receiverModel: String,
+        imageName: String, // پارامتر جدید
         age: String,
         gender: String
     ) = withContext(Dispatchers.IO) {
@@ -54,6 +54,7 @@ object LicenseManager {
             jsonParam.put("phoneModel", phoneModel)
             jsonParam.put("country", country)
             jsonParam.put("receiverModel", receiverModel)
+            jsonParam.put("imageName", imageName) // ارسال ایمیج
             jsonParam.put("age", age)
             jsonParam.put("gender", gender)
 
