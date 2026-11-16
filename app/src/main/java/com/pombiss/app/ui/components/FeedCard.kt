@@ -32,11 +32,12 @@ fun FeedCard(feed: Feed, onClick: () -> Unit) {
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = SurfaceDark.copy(alpha = 0.8f)),
-        border = BorderStroke(1.dp, NeonBlue.copy(alpha = 0.3f))
+        // حاشیه کارت با رنگ تم اصلی
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             
-            // ۱. اسم ماهواره (بالاتر از همه)
+            // ۱. اسم ماهواره
             Text(
                 text = feed.sat,
                 fontSize = 15.sp,
@@ -60,12 +61,12 @@ fun FeedCard(feed: Feed, onClick: () -> Unit) {
             
             Spacer(modifier = Modifier.height(4.dp))
             
-            // ۳. اسم فید
+            // ۳. اسم فید (با رنگ تم)
             Text(
                 text = if (feed.feedId.isNotBlank()) feed.feedId else feed.title,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = NeonBlue
+                color = MaterialTheme.colorScheme.primary 
             )
             
             Spacer(modifier = Modifier.height(6.dp))
@@ -76,7 +77,6 @@ fun FeedCard(feed: Feed, onClick: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // بخش کد فید و دکمه کپی
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = feed.cw,
@@ -94,20 +94,19 @@ fun FeedCard(feed: Feed, onClick: () -> Unit) {
                         },
                         modifier = Modifier.size(24.dp)
                     ) {
+                        // دکمه کپی با رنگ تم
                         Icon(
                             imageVector = Icons.Default.ContentCopy,
                             contentDescription = "Copy",
-                            tint = NeonGreen,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                         )
                     }
                 }
 
-                // تاریخ
                 Text(text = feed.datetime, fontSize = 12.sp, color = TextGray)
             }
             
-            // فرمت فید
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = feed.type, fontSize = 13.sp, color = TextGray)
         }
