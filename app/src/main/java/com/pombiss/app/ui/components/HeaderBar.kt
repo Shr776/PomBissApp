@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,7 +23,8 @@ import java.util.Locale
 fun HeaderBar(
     feedCount: Int,
     onRefreshClick: () -> Unit,
-    onSearchClick: () -> Unit
+    onSearchClick: () -> Unit,
+    onSettingsClick: () -> Unit // دکمه تنظیمات اضافه شد
 ) {
     val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
     val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
@@ -73,6 +75,9 @@ fun HeaderBar(
                 }
                 IconButton(onClick = onRefreshClick) {
                     Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = TextWhite)
+                }
+                IconButton(onClick = onSettingsClick) { // دکمه جدید
+                    Icon(Icons.Default.Settings, contentDescription = "Settings", tint = TextWhite)
                 }
             }
         }
