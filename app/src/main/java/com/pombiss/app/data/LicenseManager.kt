@@ -23,7 +23,6 @@ object LicenseManager {
         return android.os.Build.MODEL ?: "Unknown"
     }
 
-    // ثبت نام اولیه در سرور
     suspend fun registerDeviceOnServer(context: Context) = withContext(Dispatchers.IO) {
         val deviceId = getDeviceId(context)
         val model = getDeviceModel()
@@ -33,9 +32,11 @@ object LicenseManager {
             conn.requestMethod = "POST"
             conn.doOutput = true
             conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
+            conn.connectTimeout = 5000
+            conn.readTimeout = 5000
 
             val jsonParam = JSONObject()
-            jsonParam.put("action", "register") // نوع درخواست
+            jsonParam.put("action", "register")
             jsonParam.put("deviceId", deviceId)
             jsonParam.put("model", model)
 
@@ -51,7 +52,7 @@ object LicenseManager {
         }
     }
 
-    // چک کردن وضعیت تایید (آیا ادمین تایید کرده یا نه)
+    // چک کردن وضعیت (برمی‌گردونه true اگه تایید شده باشه، یا اگه اینترنت قطع باشه و قبلا تایید شده بوده)
     suspend fun checkUserStatus(context: Context): Boolean = withContext(Dispatchers.IO) {
         val deviceId = getDeviceId(context)
         try {
@@ -59,9 +60,11 @@ object LicenseManager {
             conn.requestMethod = "POST"
             conn.doOutput = true
             conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
+            conn.connectTimeout = 5000
+            conn.readTimeout = 5000
 
             val jsonParam = JSONObject()
-            jsonParam.put("action", "checkStatus") // نوع درخواست
+            jsonParam.put("action", "checkStatus")
             jsonParam.put("deviceId", deviceId)
 
             val os = conn.outputStream
@@ -83,11 +86,14 @@ object LicenseManager {
                 val userStatus = jsonResponse.optString("userStatus", "not_found")
                 
                 conn.disconnect()
+                // اگه وضعیت active بود، true برمی‌گردونه. اگه pending بود، false
                 return@withContext userStatus.equals("active", ignoreCase = true)
             }
             conn.disconnect()
         } catch (e: Exception) {
             e.printStackTrace()
+            // اگه اینترنت قطع بود (خطا داد)، به حافظه گوشی نگاه می‌کنه
+            return@withContext isActivated(context)
         }
         return@withContext false
     }
