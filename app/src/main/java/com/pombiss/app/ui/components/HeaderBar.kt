@@ -8,10 +8,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.pombiss.app.ui.theme.*
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -36,20 +37,16 @@ fun HeaderBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // عنوان و لوگو
+            // بخش لوگو و اسم
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "PomBiss",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Black,
-                    color = NeonBlue
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Feeds",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = NeonPink
+                // لود کردن لوگوی اصلی پلاگین از گیت‌هاب
+                AsyncImage(
+                    model = "https://raw.githubusercontent.com/Shr776/PomBiss/main/picon/PomBiss_logo.png",
+                    contentDescription = "PomBiss Logo",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .height(40.dp)
+                        .width(130.dp)
                 )
             }
 
