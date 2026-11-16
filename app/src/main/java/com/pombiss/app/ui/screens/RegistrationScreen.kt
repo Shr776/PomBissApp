@@ -29,9 +29,8 @@ fun RegistrationScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    // فیلدهای جدید
     var username by remember { mutableStateOf("") }
-    var country by remember { mutableStateOf("") }
+    var country by remember { mutableStateOf("") } // حالا متنی شد
     var phoneModel by remember { mutableStateOf(LicenseManager.getDeviceModel()) }
     
     var selectedBrand by remember { mutableStateOf("") }
@@ -46,13 +45,11 @@ fun RegistrationScreen(
     var gender by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
 
-    var countryExpanded by remember { mutableStateOf(false) }
     var genderExpanded by remember { mutableStateOf(false) }
     var brandExpanded by remember { mutableStateOf(false) }
     var modelExpanded by remember { mutableStateOf(false) }
     var imageExpanded by remember { mutableStateOf(false) }
 
-    val countries = listOf("Iran", "Turkey", "Iraq", "Afghanistan", "Azerbaijan", "Other")
     val genders = listOf("Male", "Female")
     val images = listOf("OpenATV", "OpenPLi", "OpenViX", "BlackHole", "VTi", "Egami", "Pure2", "OpenBH", "OpenSpa", "Other (Type manually...)")
 
@@ -67,7 +64,6 @@ fun RegistrationScreen(
         "Other (Type manually...)" to listOf("Other")
     )
 
-    // بررسی اینکه آیا همه فیلدها (از جمله نام کاربری) پر شده‌اند یا نه
     val isFormValid = username.isNotEmpty() && country.isNotEmpty() && gender.isNotEmpty() && age.isNotEmpty() &&
                       (selectedBrand.isNotEmpty() || customBrand.isNotEmpty()) && 
                       (selectedModel.isNotEmpty() || customModel.isNotEmpty()) && 
@@ -92,7 +88,7 @@ fun RegistrationScreen(
         Text(text = "Registration Form", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TextWhite, textAlign = TextAlign.Center)
         Spacer(modifier = Modifier.height(24.dp))
 
-        // ۰. نام کاربری (جدید)
+        // نام کاربری
         OutlinedTextField(
             value = username,
             onValueChange = { username = it },
@@ -102,20 +98,21 @@ fun RegistrationScreen(
         )
         Spacer(modifier = Modifier.height(12.dp))
 
-        // ۱. کشور
-        ExposedDropdownMenuBox(expanded = countryExpanded, onExpandedChange = { countryExpanded = !countryExpanded }) {
-            OutlinedTextField(value = country, onValueChange = {}, readOnly = true, label = { Text("Country *", color = TextGray) }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = countryExpanded) }, colors = OutlinedTextFieldDefaults.colors(focusedTextColor = TextWhite, unfocusedTextColor = TextWhite), modifier = Modifier.fillMaxWidth().menuAnchor())
-            ExposedDropdownMenu(expanded = countryExpanded, onDismissRequest = { countryExpanded = false }) {
-                countries.forEach { selection -> DropdownMenuItem(text = { Text(selection) }, onClick = { country = selection; countryExpanded = false }) }
-            }
-        }
+        // کشور (حالا متنی)
+        OutlinedTextField(
+            value = country,
+            onValueChange = { country = it },
+            label = { Text("Country *", color = TextGray) },
+            colors = OutlinedTextFieldDefaults.colors(focusedTextColor = TextWhite, unfocusedTextColor = TextWhite),
+            modifier = Modifier.fillMaxWidth()
+        )
         Spacer(modifier = Modifier.height(12.dp))
 
-        // ۲. مدل گوشی
+        // مدل گوشی
         OutlinedTextField(value = phoneModel, onValueChange = { phoneModel = it }, label = { Text("Phone Model", color = TextGray) }, colors = OutlinedTextFieldDefaults.colors(focusedTextColor = TextWhite, unfocusedTextColor = TextWhite), modifier = Modifier.fillMaxWidth())
         Spacer(modifier = Modifier.height(12.dp))
 
-        // ۳. برند رسیور
+        // برند رسیور
         ExposedDropdownMenuBox(expanded = brandExpanded, onExpandedChange = { brandExpanded = !brandExpanded }) {
             OutlinedTextField(value = selectedBrand, onValueChange = {}, readOnly = true, label = { Text("Receiver Brand *", color = TextGray) }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = brandExpanded) }, colors = OutlinedTextFieldDefaults.colors(focusedTextColor = TextWhite, unfocusedTextColor = TextWhite), modifier = Modifier.fillMaxWidth().menuAnchor())
             ExposedDropdownMenu(expanded = brandExpanded, onDismissRequest = { brandExpanded = false }) {
@@ -131,7 +128,7 @@ fun RegistrationScreen(
         }
         Spacer(modifier = Modifier.height(12.dp))
 
-        // ۴. مدل رسیور
+        // مدل رسیور
         if (selectedBrand.isNotEmpty() && selectedBrand != "Other (Type manually...)") {
             val availableModels = brandModels[selectedBrand] ?: listOf("Other")
             ExposedDropdownMenuBox(expanded = modelExpanded, onExpandedChange = { modelExpanded = !modelExpanded }) {
@@ -148,7 +145,7 @@ fun RegistrationScreen(
             Spacer(modifier = Modifier.height(12.dp))
         }
 
-        // ۵. ایمیج انیگما
+        // ایمیج انیگما
         ExposedDropdownMenuBox(expanded = imageExpanded, onExpandedChange = { imageExpanded = !imageExpanded }) {
             OutlinedTextField(value = selectedImage, onValueChange = {}, readOnly = true, label = { Text("Enigma2 Image *", color = TextGray) }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = imageExpanded) }, colors = OutlinedTextFieldDefaults.colors(focusedTextColor = TextWhite, unfocusedTextColor = TextWhite), modifier = Modifier.fillMaxWidth().menuAnchor())
             ExposedDropdownMenu(expanded = imageExpanded, onDismissRequest = { imageExpanded = false }) {
@@ -162,11 +159,11 @@ fun RegistrationScreen(
         }
         Spacer(modifier = Modifier.height(12.dp))
 
-        // ۶. سن
+        // سن
         OutlinedTextField(value = age, onValueChange = { age = it }, label = { Text("Age *", color = TextGray) }, colors = OutlinedTextFieldDefaults.colors(focusedTextColor = TextWhite, unfocusedTextColor = TextWhite), modifier = Modifier.fillMaxWidth())
         Spacer(modifier = Modifier.height(12.dp))
 
-        // ۷. جنسیت
+        // جنسیت
         ExposedDropdownMenuBox(expanded = genderExpanded, onExpandedChange = { genderExpanded = !genderExpanded }) {
             OutlinedTextField(value = gender, onValueChange = {}, readOnly = true, label = { Text("Gender *", color = TextGray) }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = genderExpanded) }, colors = OutlinedTextFieldDefaults.colors(focusedTextColor = TextWhite, unfocusedTextColor = TextWhite), modifier = Modifier.fillMaxWidth().menuAnchor())
             ExposedDropdownMenu(expanded = genderExpanded, onDismissRequest = { genderExpanded = false }) {
@@ -175,7 +172,7 @@ fun RegistrationScreen(
         }
         Spacer(modifier = Modifier.height(24.dp))
 
-        // دکمه ثبت‌نام (اجباری بودن همه فیلدها)
+        // دکمه ثبت‌نام
         Button(
             onClick = {
                 isLoading = true
@@ -186,7 +183,7 @@ fun RegistrationScreen(
                         val finalImage = if (selectedImage == "Other (Type manually...)") customImage else selectedImage
                         
                         LicenseManager.registerDeviceWithDetails(
-                            context, username, country, phoneModel, "$finalBrand $finalModel", finalImage, age, gender
+                            context, username, country, phoneModel, finalBrand, finalModel, finalImage, age, gender
                         )
                         onRegistrationSuccess()
                     } catch (e: Exception) {
