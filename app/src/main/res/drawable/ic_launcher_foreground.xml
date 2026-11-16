@@ -3,19 +3,60 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+
+    <!-- پس‌زمینه دایره‌ای تیره (اختیاری) -->
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M54,54m-54,0a54,54 0,1 1,108 0a54,54 0,1 1,-108 0" />
+
+    <!-- نوشته Live (به شکل نئونی قرمز) -->
+    <path
+        android:strokeColor="#FF0033"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M 30,40 L 45,40 M 30,40 L 30,55 M 30,55 L 45,55 M 35,40 L 35,55" />
     
-    <!-- متن Live Feed -->
     <path
-        android:fillColor="#00E676"
-        android:pathData="M20,54 L88,54 M54,20 L54,88"
-        android:strokeWidth="2"
-        android:strokeColor="#00E676" />
+        android:strokeColor="#FF0033"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M 50,40 L 50,55" />
+    
+    <path
+        android:strokeColor="#FF0033"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M 50,40 L 60,55 M 60,40 L 50,55" />
+    
+    <path
+        android:strokeColor="#FF0033"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M 65,40 L 65,55 M 65,40 L 75,40 M 65,48 L 75,48 M 65,55 L 75,55" />
+
+    <!-- نوشته Feed (به شکل نئونی آبی/صورتی) -->
+    <path
+        android:strokeColor="#00D8FF"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M 30,65 L 30,75 M 30,65 L 40,65 M 30,70 L 38,70" />
+
+    <path
+        android:strokeColor="#00D8FF"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M 45,65 L 45,75 M 45,65 L 55,65 M 45,70 L 55,70 M 45,75 L 55,75" />
+
+    <path
+        android:strokeColor="#00D8FF"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M 60,65 L 60,75 M 60,65 L 70,65 M 60,70 L 70,70 M 60,75 L 70,75" />
+
+    <path
+        android:strokeColor="#00D8FF"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M 75,65 L 75,75 M 75,65 L 85,65 M 75,70 L 85,70 M 75,75 L 85,75" />
         
-    <path
-        android:fillColor="#0066FF"
-        android:pathData="M 30,50 L 78,50 L 78,58 L 30,58 Z" />
-        
-    <path
-        android:fillColor="#EC4899"
-        android:pathData="M 40,40 L 68,40 L 68,44 L 40,44 Z" />
 </vector>
