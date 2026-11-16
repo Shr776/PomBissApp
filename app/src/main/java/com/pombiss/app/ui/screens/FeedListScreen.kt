@@ -4,8 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,6 +20,7 @@ import com.pombiss.app.ui.components.HeaderBar
 import com.pombiss.app.ui.theme.*
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedListScreen(
     repository: FeedRepository,
@@ -27,6 +29,11 @@ fun FeedListScreen(
     var feeds by remember { mutableStateOf<List<Feed>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
+    
+    // وضعیت‌های مربوط به جستجو
+    var showSearchBar by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+
     val scope = rememberCoroutineScope()
 
     fun loadFeeds(force: Boolean) {
@@ -47,16 +54,57 @@ fun FeedListScreen(
         loadFeeds(false)
     }
 
+    // فیلتر کردن لیست بر اساس متن جستجو
+    val filteredFeeds = if (searchQuery.isBlank()) {
+        feeds
+    } else {
+        feeds.filter {
+            it.sat.contains(searchQuery, ignoreCase = true) ||
+            it.feedId.contains(searchQuery, ignoreCase = true) ||
+            it.title.contains(searchQuery, ignoreCase = true) ||
+            it.freq.contains(searchQuery, ignoreCase = true)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(DarkBackground)
     ) {
         HeaderBar(
-            feedCount = feeds.size,
+            feedCount = filteredFeeds.size,
             onRefreshClick = { loadFeeds(true) },
-            onSearchClick = { /* TODO: Search implementation */ }
+            onSearchClick = { 
+                showSearchBar = !showSearchBar 
+                if (!showSearchBar) searchQuery = "" // وقتی بسته شد، متن پاک بشه
+            }
         )
+
+        // نوار جستجو (فقط وقتی آیکون ذره‌بین زده میشه نمایش داده میشه)
+        if (showSearchBar) {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = { Text("Search by name, satellite, or freq...", color = TextGray) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                singleLine = true,
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { searchQuery = "" }) {
+                            Icon(Icons.Default.Close, contentDescription = "Clear", tint = TextWhite)
+                        }
+                    }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = NeonBlue,
+                    unfocusedBorderColor = TextGray,
+                    focusedTextColor = TextWhite,
+                    unfocusedTextColor = TextWhite
+                )
+            )
+        }
 
         if (isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -67,24 +115,30 @@ fun FeedListScreen(
                 Text(text = errorMsg!!, color = NeonRed)
             }
         } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 16.dp)
-            ) {
-                items(feeds) { feed ->
-                    FeedCard(feed = feed, onClick = { onFeedClick(feed) })
+            if (filteredFeeds.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = "No feeds found matching your search.", color = TextGray)
                 }
-                
-                // فوتر تبلیغاتی
-                item {
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Text(
-                        text = "Developed by @Shr776 | @VuSolo | @PomSat",
-                        color = TextGray,
-                        fontSize = 12.sp,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 16.dp)
+                ) {
+                    items(filteredFeeds) { feed ->
+                        FeedCard(feed = feed, onClick = { onFeedClick(feed) })
+                    }
+                    
+                    // فوتر تبلیغاتی
+                    item {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text(
+                            text = "Developed by @Shr776 | @VuSolo | @PomSat",
+                            color = TextGray,
+                            fontSize = 12.sp,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
         }
