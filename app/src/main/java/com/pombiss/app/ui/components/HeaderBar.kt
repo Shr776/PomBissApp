@@ -37,18 +37,15 @@ fun HeaderBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // بخش لوگو و اسم
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                // لود کردن لوگوی اصلی پلاگین از گیت‌هاب
-                AsyncImage(
-                    model = "https://raw.githubusercontent.com/Shr776/PomBiss/main/picon/PomBiss_logo.png",
-                    contentDescription = "PomBiss Logo",
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .height(40.dp)
-                        .width(130.dp)
-                )
-            }
+            // بخش لوگو
+            AsyncImage(
+                model = "https://raw.githubusercontent.com/Shr776/PomBiss/main/picon/PomBiss_logo.png",
+                contentDescription = "PomBiss Logo",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .height(40.dp)
+                    .width(130.dp)
+            )
 
             // ساعت و تاریخ
             Column(horizontalAlignment = Alignment.End) {
