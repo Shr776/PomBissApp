@@ -27,12 +27,14 @@ object LicenseManager {
         return android.os.Build.BRAND ?: "Unknown"
     }
 
+    // تغییرات: برند و مدل رسیور از هم جدا شدن
     suspend fun registerDeviceWithDetails(
         context: Context,
-        username: String, // پارامتر جدید
+        username: String,
         country: String,
         phoneModel: String,
-        receiverModel: String,
+        receiverBrand: String, // جدا
+        receiverModel: String, // جدا
         imageName: String,
         age: String,
         gender: String
@@ -52,10 +54,11 @@ object LicenseManager {
             jsonParam.put("action", "register")
             jsonParam.put("deviceId", deviceId)
             jsonParam.put("brand", brand)
-            jsonParam.put("username", username) // ارسال نام کاربری
+            jsonParam.put("username", username)
             jsonParam.put("phoneModel", phoneModel)
             jsonParam.put("country", country)
-            jsonParam.put("receiverModel", receiverModel)
+            jsonParam.put("receiverBrand", receiverBrand) // ارسال برند جدا
+            jsonParam.put("receiverModel", receiverModel) // ارسال مدل جدا
             jsonParam.put("imageName", imageName)
             jsonParam.put("age", age)
             jsonParam.put("gender", gender)
