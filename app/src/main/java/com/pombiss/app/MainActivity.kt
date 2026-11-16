@@ -24,27 +24,23 @@ class MainActivity : ComponentActivity() {
         setContent {
             val context = LocalContext.current
             
-            // وضعیت تم فعلی
             var currentTheme by remember { mutableStateOf(ThemeManager.getSelectedTheme(context)) }
-            
-            // وضعیت باز بودن صفحه تنظیمات
             var showSettings by remember { mutableStateOf(false) }
 
             PomBissTheme(
                 primaryColor = currentTheme.primary,
                 accentColor = currentTheme.accent
             ) {
-                // اگه صفحه تنظیمات باز بود، اون رو نشون بده
                 if (showSettings) {
                     SettingsScreen(
                         currentThemeId = currentTheme.id,
                         onThemeSelected = { themeId ->
                             ThemeManager.saveTheme(context, themeId)
-                            currentTheme = ThemeManager.getSelectedTheme(context) // آپدیت تم در لحظه
+                            currentTheme = ThemeManager.getSelectedTheme(context)
                         },
                         onBack = { showSettings = false }
                     )
-                    return@PomBissTheme // بقیه کدها اجرا نشن
+                    return@PomBissTheme
                 }
 
                 var appState by remember { mutableStateOf(3) }
@@ -74,8 +70,9 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     0 -> {
-                        ActivationScreen(
-                            onActivationSuccess = { appState = 1 }
+                        // صفحه ثبت‌نام جدید
+                        RegistrationScreen(
+                            onRegistrationSuccess = { appState = 1 }
                         )
                     }
                     1 -> {
@@ -91,7 +88,7 @@ class MainActivity : ComponentActivity() {
                             FeedListScreen(
                                 repository = repository,
                                 onFeedClick = { feed -> selectedFeed = feed },
-                                onSettingsClick = { showSettings = true } // رفتن به تنظیمات
+                                onSettingsClick = { showSettings = true }
                             )
                         } else {
                             FeedDetailScreen(
