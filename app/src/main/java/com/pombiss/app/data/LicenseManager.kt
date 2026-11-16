@@ -23,9 +23,15 @@ object LicenseManager {
         return android.os.Build.MODEL ?: "Unknown"
     }
 
+    // گرفتن برند گوشی
+    fun getDeviceBrand(): String {
+        return android.os.Build.BRAND ?: "Unknown"
+    }
+
     suspend fun registerDeviceOnServer(context: Context) = withContext(Dispatchers.IO) {
         val deviceId = getDeviceId(context)
         val model = getDeviceModel()
+        val brand = getDeviceBrand() // گرفتن برند
 
         try {
             val conn = URL(SCRIPT_URL).openConnection() as HttpURLConnection
@@ -39,6 +45,7 @@ object LicenseManager {
             jsonParam.put("action", "register")
             jsonParam.put("deviceId", deviceId)
             jsonParam.put("model", model)
+            jsonParam.put("brand", brand) // ارسال برند به سرور
 
             val os = conn.outputStream
             os.write(jsonParam.toString().toByteArray(Charsets.UTF_8))
@@ -52,7 +59,6 @@ object LicenseManager {
         }
     }
 
-    // چک کردن وضعیت (برمی‌گردونه true اگه تایید شده باشه، یا اگه اینترنت قطع باشه و قبلا تایید شده بوده)
     suspend fun checkUserStatus(context: Context): Boolean = withContext(Dispatchers.IO) {
         val deviceId = getDeviceId(context)
         try {
@@ -86,13 +92,11 @@ object LicenseManager {
                 val userStatus = jsonResponse.optString("userStatus", "not_found")
                 
                 conn.disconnect()
-                // اگه وضعیت active بود، true برمی‌گردونه. اگه pending بود، false
                 return@withContext userStatus.equals("active", ignoreCase = true)
             }
             conn.disconnect()
         } catch (e: Exception) {
             e.printStackTrace()
-            // اگه اینترنت قطع بود (خطا داد)، به حافظه گوشی نگاه می‌کنه
             return@withContext isActivated(context)
         }
         return@withContext false
