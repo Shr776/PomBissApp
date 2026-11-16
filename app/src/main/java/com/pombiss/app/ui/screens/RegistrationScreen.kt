@@ -30,17 +30,23 @@ fun RegistrationScreen(
     val scope = rememberCoroutineScope()
 
     var country by remember { mutableStateOf("") }
-    var phoneModel by remember { mutableStateOf(LicenseManager.getDeviceModel()) } // پیش‌فرض مدل گوشی
+    var phoneModel by remember { mutableStateOf(LicenseManager.getDeviceModel()) }
     var receiverModel by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
 
-    // منوهای کشویی
     var countryExpanded by remember { mutableStateOf(false) }
     var genderExpanded by remember { mutableStateOf(false) }
-    val countries = listOf("Iran", "Turkey", "Iraq", "Afghanistan", "Other")
+    var receiverExpanded by remember { mutableStateOf(false) }
+
+    val countries = listOf("Iran", "Turkey", "Iraq", "Afghanistan", "Azerbaijan", "Other")
     val genders = listOf("Male", "Female")
+    val receivers = listOf(
+        "Vu+ Zero", "Vu+ Solo2", "Vu+ Duo4K", "Vu+ Uno4K",
+        "Dreambox 800", "Dreambox 900", "Octagon SF8008",
+        "Zgemma H9", "Zgemma H7", "Mutant HD51", "Other"
+    )
 
     Column(
         modifier = Modifier
@@ -51,14 +57,16 @@ fun RegistrationScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(24.dp))
-        // لوگو
+        
         AsyncImage(
             model = "https://raw.githubusercontent.com/Shr776/PomBiss/main/picon/PomBiss_logo.png",
             contentDescription = "Logo",
             contentScale = ContentScale.Fit,
             modifier = Modifier.height(70.dp).fillMaxWidth()
         )
+        
         Spacer(modifier = Modifier.height(16.dp))
+        
         Text(
             text = "Registration Form",
             fontSize = 22.sp,
@@ -66,9 +74,10 @@ fun RegistrationScreen(
             color = TextWhite,
             textAlign = TextAlign.Center
         )
+        
         Spacer(modifier = Modifier.height(24.dp))
 
-        // ۱. کشور (Dropdown)
+        // ۱. کشور
         ExposedDropdownMenuBox(
             expanded = countryExpanded,
             onExpandedChange = { countryExpanded = !countryExpanded }
@@ -93,7 +102,7 @@ fun RegistrationScreen(
         }
         Spacer(modifier = Modifier.height(12.dp))
 
-        // ۲. مدل گوشی
+        // ۲. مدل گوشی (خودکار پر میشه)
         OutlinedTextField(
             value = phoneModel,
             onValueChange = { phoneModel = it },
@@ -103,17 +112,32 @@ fun RegistrationScreen(
         )
         Spacer(modifier = Modifier.height(12.dp))
 
-        // ۳. مدل رسیور
-        OutlinedTextField(
-            value = receiverModel,
-            onValueChange = { receiverModel = it },
-            label = { Text("Receiver Model (e.g. Vu+ Zero)", color = TextGray) },
-            colors = OutlinedTextFieldDefaults.colors(focusedTextColor = TextWhite, unfocusedTextColor = TextWhite),
-            modifier = Modifier.fillMaxWidth()
-        )
+        // ۳. مدل رسیور (لیست کشویی)
+        ExposedDropdownMenuBox(
+            expanded = receiverExpanded,
+            onExpandedChange = { receiverExpanded = !receiverExpanded }
+        ) {
+            OutlinedTextField(
+                value = receiverModel,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Receiver Model", color = TextGray) },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = receiverExpanded) },
+                colors = OutlinedTextFieldDefaults.colors(focusedTextColor = TextWhite, unfocusedTextColor = TextWhite),
+                modifier = Modifier.fillMaxWidth().menuAnchor()
+            )
+            ExposedDropdownMenu(expanded = receiverExpanded, onDismissRequest = { receiverExpanded = false }) {
+                receivers.forEach { selection ->
+                    DropdownMenuItem(text = { Text(selection) }, onClick = {
+                        receiverModel = selection
+                        receiverExpanded = false
+                    })
+                }
+            }
+        }
         Spacer(modifier = Modifier.height(12.dp))
 
-        // ۴. سن
+        // ۴. سن (تایپی)
         OutlinedTextField(
             value = age,
             onValueChange = { age = it },
@@ -123,7 +147,7 @@ fun RegistrationScreen(
         )
         Spacer(modifier = Modifier.height(12.dp))
 
-        // ۵. جنسیت (Dropdown)
+        // ۵. جنسیت (لیست کشویی)
         ExposedDropdownMenuBox(
             expanded = genderExpanded,
             onExpandedChange = { genderExpanded = !genderExpanded }
@@ -154,7 +178,6 @@ fun RegistrationScreen(
                 isLoading = true
                 scope.launch {
                     try {
-                        // ارسال همه اطلاعات به گوگل اسکریپت
                         LicenseManager.registerDeviceWithDetails(
                             context, country, phoneModel, receiverModel, age, gender
                         )
@@ -167,7 +190,7 @@ fun RegistrationScreen(
             modifier = Modifier.fillMaxWidth().height(56.dp),
             colors = ButtonDefaults.buttonColors(containerColor = NeonBlue),
             shape = RoundedCornerShape(12.dp),
-            enabled = !isLoading && country.isNotEmpty() && gender.isNotEmpty()
+            enabled = !isLoading && country.isNotEmpty() && gender.isNotEmpty() && receiverModel.isNotEmpty()
         ) {
             if (isLoading) {
                 CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
