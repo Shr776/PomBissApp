@@ -24,7 +24,7 @@ fun HeaderBar(
     feedCount: Int,
     onRefreshClick: () -> Unit,
     onSearchClick: () -> Unit,
-    onSettingsClick: () -> Unit // دکمه تنظیمات اضافه شد
+    onSettingsClick: () -> Unit
 ) {
     val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
     val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
@@ -39,7 +39,6 @@ fun HeaderBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // بخش لوگو
             AsyncImage(
                 model = "https://raw.githubusercontent.com/Shr776/PomBiss/main/picon/PomBiss_logo.png",
                 contentDescription = "PomBiss Logo",
@@ -49,9 +48,13 @@ fun HeaderBar(
                     .width(130.dp)
             )
 
-            // ساعت و تاریخ
             Column(horizontalAlignment = Alignment.End) {
-                Text(text = currentTime, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = TextCyan)
+                Text(
+                    text = currentTime, 
+                    fontSize = 24.sp, 
+                    fontWeight = FontWeight.Bold, 
+                    color = MaterialTheme.colorScheme.primary // رنگ تم
+                )
                 Text(text = currentDate, fontSize = 12.sp, color = TextGray)
             }
         }
@@ -66,7 +69,7 @@ fun HeaderBar(
             Text(
                 text = "$feedCount feeds",
                 fontSize = 14.sp,
-                color = NeonGreen
+                color = MaterialTheme.colorScheme.secondary // رنگ تم
             )
 
             Row {
@@ -76,12 +79,13 @@ fun HeaderBar(
                 IconButton(onClick = onRefreshClick) {
                     Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = TextWhite)
                 }
-                IconButton(onClick = onSettingsClick) { // دکمه جدید
+                IconButton(onClick = onSettingsClick) {
                     Icon(Icons.Default.Settings, contentDescription = "Settings", tint = TextWhite)
                 }
             }
         }
         
-        HorizontalDivider(color = NeonBlue.copy(alpha = 0.3f), thickness = 1.dp)
+        // خط جداکننده با رنگ تم
+        HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), thickness = 1.dp)
     }
 }
