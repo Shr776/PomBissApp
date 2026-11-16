@@ -75,12 +75,12 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // اسم فید
+            // اسم فید (با رنگ تم)
             Text(
                 text = if (feed.feedId.isNotBlank()) feed.feedId else feed.title,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = NeonBlue,
+                color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center
             )
 
@@ -96,11 +96,11 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // کد فید (CW) با طراحی برجسته و دکمه کپی
+            // کد فید (CW) با طراحی برجسته و دکمه کپی (با رنگ تم)
             Card(
                 colors = CardDefaults.cardColors(containerColor = SurfaceDark),
                 shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(1.dp, NeonPink.copy(alpha = 0.5f))
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -121,7 +121,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
                             Toast.makeText(context, "کد کپی شد!", Toast.LENGTH_SHORT).show()
                         }
                     ) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy CW", tint = TextWhite)
+                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy CW", tint = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
@@ -138,10 +138,10 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
             Spacer(modifier = Modifier.weight(1f))
 
             // فوتر تبلیغاتی
-            HorizontalDivider(color = NeonBlue.copy(alpha = 0.3f), thickness = 1.dp)
+            HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), thickness = 1.dp)
             Spacer(modifier = Modifier.height(16.dp))
             
-            Text(text = "Developed by @Shr776", color = NeonPink, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+            Text(text = "Developed by @Shr776", color = MaterialTheme.colorScheme.primary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
             Text(text = "Channel: @VuSolo | Support: @PomSat", color = TextGray, fontSize = 12.sp)
             Text(text = "Feeds: @PomFeed | @FeedHunter", color = TextGray, fontSize = 12.sp)
             Text(text = "YouTube: @VUSOLO | GitHub: Shr776 / PomBiss", color = TextGray, fontSize = 12.sp)
