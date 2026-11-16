@@ -9,7 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.pombiss.app.data.Feed
 import com.pombiss.app.data.FeedRepository
-import com.pombiss.app.data.LicenseManager
+import com.pombiss.app.data.LicenseManager // این خط اضافه شد
 import com.pombiss.app.ui.screens.ActivationScreen
 import com.pombiss.app.ui.screens.FeedDetailScreen
 import com.pombiss.app.ui.screens.FeedListScreen
