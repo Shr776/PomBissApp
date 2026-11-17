@@ -11,10 +11,11 @@ data class Feed(
     val type: String,
     val feedId: String,
     val event: String,
+    val category: String,
     val datetime: String
 ) {
-    // این تابع برای اینه که کل مشخصات رو با یه دکمه بشه کپی کرد
+    // این تابع برای کپی کردن هست و حالا اسم کانال شما رو هم تهش اضافه می‌کنه
     fun toShareString(): String {
-        return "Sat: $sat\nFreq: $freq $pol $sr\nFeed: ${if(feedId.isNotBlank()) feedId else title}\nType: $type\nCW: $cw\nTime: $datetime"
+        return "Sat: $sat\nFreq: $freq $pol $sr\nFeed: ${if(feedId.isNotBlank()) feedId else title}\nType: $type\nCW: $cw\nTime: $datetime\n\n📡 Channel: @VuSolo"
     }
 }
