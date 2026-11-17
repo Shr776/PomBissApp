@@ -44,9 +44,9 @@ fun FeedCard(feed: Feed, onClick: () -> Unit) {
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                // عنوان فید (سفید و بدون هشتگ)
+                // عنوان فید
                 Text(
-                    text = feed.title, // این از پارسر میاد و هشتگ نداره
+                    text = feed.title,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextWhite
@@ -68,7 +68,7 @@ fun FeedCard(feed: Feed, onClick: () -> Unit) {
                 
                 Spacer(modifier = Modifier.height(6.dp))
                 
-                // اسم کوتاه فید
+                // اسم فید
                 Text(
                     text = if (feed.feedId.isNotBlank()) feed.feedId else feed.title,
                     fontSize = 14.sp,
@@ -78,32 +78,34 @@ fun FeedCard(feed: Feed, onClick: () -> Unit) {
                 
                 Spacer(modifier = Modifier.height(8.dp))
                 
-                // کد فید، دکمه کپی و تاریخ
+                // ردیف کد فید و دکمه کپی
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = feed.cw, fontSize = 13.sp, color = NeonOrange, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    IconButton(
+                        onClick = {
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            val clip = ClipData.newPlainText("Feed Info", feed.toShareString())
+                            clipboard.setPrimaryClip(clip)
+                            Toast.makeText(context, "اطلاعات کپی شد!", Toast.LENGTH_SHORT).show()
+                        },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(6.dp))
+                
+                // حالا تاریخ و فرمت کنار هم هستن
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = feed.cw, fontSize = 13.sp, color = NeonOrange, fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.width(6.dp))
-                        IconButton(
-                            onClick = {
-                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                val clip = ClipData.newPlainText("Feed Info", feed.toShareString())
-                                clipboard.setPrimaryClip(clip)
-                                Toast.makeText(context, "اطلاعات کپی شد!", Toast.LENGTH_SHORT).show()
-                            },
-                            modifier = Modifier.size(24.dp)
-                        ) {
-                            Icon(Icons.Default.ContentCopy, contentDescription = "Copy", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
-                        }
-                    }
+                    Text(text = feed.type, fontSize = 12.sp, color = TextGray)
                     Text(text = feed.datetime, fontSize = 11.sp, color = TextGray)
                 }
-                
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(text = feed.type, fontSize = 12.sp, color = TextGray)
             }
 
             // خط عمودی جداکننده
@@ -115,14 +117,14 @@ fun FeedCard(feed: Feed, onClick: () -> Unit) {
                 thickness = 1.dp
             )
 
-            // ماهواره بزرگ سمت راست
+            // ماهواره بزرگ‌تر و بازتر
             Text(
-                text = feed.sat, // این هم از پارسر به صورت خلاصه (13E) میاد
-                fontSize = 26.sp,
+                text = feed.sat,
+                fontSize = 34.sp, // بزرگ‌ترش کردم
                 fontWeight = FontWeight.Black,
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.width(60.dp) 
+                modifier = Modifier.width(80.dp) // فضای بیشتری بهش دادم
             )
         }
     }
