@@ -17,24 +17,36 @@ object FeedParser {
         val sr = freqInfo[3]
 
         val cw = parts.getOrNull(1) ?: ""
-        val rawTitle = parts.getOrNull(2) ?: ""
-        val sat = parts.getOrNull(3) ?: ""
         
+        // --- شروع منطق کوتاه کردن عنوان ---
+        var rawTitle = parts.getOrNull(2) ?: ""
+        // اگه پرانتز داشت، فقط تا قبل از پرانتز رو بردار
+        if (rawTitle.contains("(")) {
+            rawTitle = rawTitle.substringBefore("(").trim()
+        }
+        // اگه فاصله داشت و کلمه اول با هشتگ بود، فقط کلمه اول رو بردار
+        if (rawTitle.startsWith("#") && rawTitle.contains(" ")) {
+            rawTitle = rawTitle.split(" ")[0]
+        }
+        val title = rawTitle.trim()
+        // -----------------------------------
+
+        // --- شروع منطق کوتاه کردن اسم ماهواره ---
+        var sat = parts.getOrNull(3) ?: ""
+        // اگه اسم ماهواره طولانی بود (مثل HotBird 13F/13G ( 13E ))، فقط قسمت داخل پرانتز (13E) رو بردار
+        if (sat.contains("(")) {
+            sat = sat.substringAfter("(").substringBefore(")").trim()
+        }
+        // اگه هنوز طولانی بود، کوتاهش کن
+        if (sat.length > 7) {
+            sat = sat.take(7) + "..."
+        }
+        // -------------------------------------
+
         val type = parts.getOrNull(4) ?: ""
         val feedId = parts.getOrNull(5) ?: ""
         val event = parts.getOrNull(6) ?: ""
-        
         val datetime = parts.lastOrNull { it.contains("-") && it.contains(":") } ?: ""
-
-        // ۱. اضافه کردن هشتگ به عنوان
-        val title = if (rawTitle.isNotBlank()) "#$rawTitle" else ""
-
-        // ۲. استخراج نام مختصر ماهواره (مثلا از Eutelsat 16D (16E) میشه 16E)
-        var shortSat = sat
-        val match = Regex("""\(([^)]+)\)""").find(sat)
-        if (match != null) {
-            shortSat = match.groupValues[1].trim()
-        }
 
         return Feed(
             position = position,
@@ -43,11 +55,11 @@ object FeedParser {
             sr = sr,
             cw = cw,
             title = title,
-            sat = shortSat,
+            sat = sat,
             type = type,
             feedId = feedId,
             event = event,
-            category = "", // فعلاً خالی، بعداً پر میشه
+            category = "",
             datetime = datetime
         )
     }
