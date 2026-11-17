@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,7 +31,8 @@ fun RegistrationScreen(
     val scope = rememberCoroutineScope()
 
     var username by remember { mutableStateOf("") }
-    var country by remember { mutableStateOf("") } // حالا متنی شد
+    var password by remember { mutableStateOf("") } // فیلد پسورد
+    var country by remember { mutableStateOf("") }
     var phoneModel by remember { mutableStateOf(LicenseManager.getDeviceModel()) }
     
     var selectedBrand by remember { mutableStateOf("") }
@@ -64,7 +66,7 @@ fun RegistrationScreen(
         "Other (Type manually...)" to listOf("Other")
     )
 
-    val isFormValid = username.isNotEmpty() && country.isNotEmpty() && gender.isNotEmpty() && age.isNotEmpty() &&
+    val isFormValid = username.isNotEmpty() && password.isNotEmpty() && country.isNotEmpty() && gender.isNotEmpty() && age.isNotEmpty() &&
                       (selectedBrand.isNotEmpty() || customBrand.isNotEmpty()) && 
                       (selectedModel.isNotEmpty() || customModel.isNotEmpty()) && 
                       (selectedImage.isNotEmpty() || customImage.isNotEmpty())
@@ -98,7 +100,18 @@ fun RegistrationScreen(
         )
         Spacer(modifier = Modifier.height(12.dp))
 
-        // کشور (حالا متنی)
+        // پسورد
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password *", color = TextGray) },
+            visualTransformation = PasswordVisualTransformation(),
+            colors = OutlinedTextFieldDefaults.colors(focusedTextColor = TextWhite, unfocusedTextColor = TextWhite),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // کشور
         OutlinedTextField(
             value = country,
             onValueChange = { country = it },
@@ -183,7 +196,7 @@ fun RegistrationScreen(
                         val finalImage = if (selectedImage == "Other (Type manually...)") customImage else selectedImage
                         
                         LicenseManager.registerDeviceWithDetails(
-                            context, username, country, phoneModel, finalBrand, finalModel, finalImage, age, gender
+                            context, username, password, country, phoneModel, finalBrand, finalModel, finalImage, age, gender
                         )
                         onRegistrationSuccess()
                     } catch (e: Exception) {
