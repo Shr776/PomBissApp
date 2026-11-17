@@ -1,7 +1,6 @@
 package com.pombiss.app.data
 
 import android.content.Context
-import android.provider.Settings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -9,14 +8,28 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.UUID
+import java.io.File
 
 object LicenseManager {
 
     private const val SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlckeyeshqWrLzjUTderETd2iDMfN77ca1LeXXsFz9JI5ZijPiT0o9FiruyBhXb2o/exec"
 
     fun getDeviceId(context: Context): String {
-        val androidId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
-        return androidId.take(8).uppercase()
+        val brand = android.os.Build.BRAND ?: "Unknown"
+        val model = android.os.Build.MODEL ?: "Unknown"
+        
+        val uuidFile = File(context.filesDir, "pombiss_device_uuid.txt")
+        var uniqueId = ""
+
+        if (uuidFile.exists()) {
+            uniqueId = uuidFile.readText()
+        } else {
+            uniqueId = UUID.randomUUID().toString().take(8).uppercase()
+            uuidFile.writeText(uniqueId)
+        }
+
+        return "$brand-$model-$uniqueId".replace(" ", "").uppercase()
     }
 
     fun getDeviceModel(): String {
@@ -27,9 +40,58 @@ object LicenseManager {
         return android.os.Build.BRAND ?: "Unknown"
     }
 
+    // تابع لاگین
+    suspend fun loginUser(context: Context, username: String, password: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val conn = URL(SCRIPT_URL).openConnection() as HttpURLConnection
+            conn.requestMethod = "POST"
+            conn.doOutput = true
+            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
+            conn.connectTimeout = 5000
+            conn.readTimeout = 5000
+
+            val jsonParam = JSONObject()
+            jsonParam.put("action", "login")
+            jsonParam.put("username", username)
+            jsonParam.put("password", password)
+
+            val os = conn.outputStream
+            os.write(jsonParam.toString().toByteArray(Charsets.UTF_8))
+            os.flush()
+            os.close()
+
+            val responseCode = conn.responseCode
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                val reader = BufferedReader(InputStreamReader(conn.inputStream))
+                val response = StringBuilder()
+                var line: String?
+                while (reader.readLine().also { line = it } != null) {
+                    response.append(line)
+                }
+                reader.close()
+                
+                val jsonResponse = JSONObject(response.toString())
+                val status = jsonResponse.optString("status", "error")
+                val userStatus = jsonResponse.optString("userStatus", "not_found")
+                
+                conn.disconnect()
+                
+                // اگه لاگین موفق بود و وضعیت active بود
+                if (status == "success" && userStatus.equals("active", ignoreCase = true)) {
+                    return@withContext true
+                }
+            }
+            conn.disconnect()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return@withContext false
+    }
+
     suspend fun registerDeviceWithDetails(
         context: Context,
         username: String,
+        password: String, // پسورد جدید
         country: String,
         phoneModel: String,
         receiverBrand: String,
@@ -54,6 +116,7 @@ object LicenseManager {
             jsonParam.put("deviceId", deviceId)
             jsonParam.put("brand", brand)
             jsonParam.put("username", username)
+            jsonParam.put("password", password) // ارسال پسورد
             jsonParam.put("phoneModel", phoneModel)
             jsonParam.put("country", country)
             jsonParam.put("receiverBrand", receiverBrand)
@@ -74,7 +137,6 @@ object LicenseManager {
         }
     }
 
-    // تابع چک کردن وضعیت با قابلیت آفلاین
     suspend fun checkUserStatus(context: Context): Boolean = withContext(Dispatchers.IO) {
         val deviceId = getDeviceId(context)
         try {
@@ -109,21 +171,14 @@ object LicenseManager {
                 
                 conn.disconnect()
                 
-                // اگه وضعیت active بود، true برمی‌گردونه
                 if (userStatus.equals("active", ignoreCase = true)) {
                     return@withContext true
                 }
-                // اگه وضعیت pending بود، false برمی‌گردونه (یعنی نباید وارد بشه)
-                if (userStatus.equals("pending", ignoreCase = true)) {
-                    return@withContext false
-                }
-                // اگه پیدا نشد (چون برنامه رو پاک کرده)، false برمی‌گردونه تا دوباره ثبت‌نام کنه
                 return@withContext false
             }
             conn.disconnect()
         } catch (e: Exception) {
             e.printStackTrace()
-            // اگه اینترنت قطع بود، از حافظه گوشی می‌خونه (تا کاربر آفلاین بتونه وارد بشه)
             return@withContext isActivated(context)
         }
         return@withContext false
