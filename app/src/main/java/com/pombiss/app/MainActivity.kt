@@ -16,7 +16,6 @@ import com.pombiss.app.data.FeedRepository
 import com.pombiss.app.data.LicenseManager
 import com.pombiss.app.ui.screens.*
 import com.pombiss.app.ui.theme.*
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,19 +42,21 @@ class MainActivity : ComponentActivity() {
                     return@PomBissTheme
                 }
 
+                // وضعیت‌ها: 3=لودینگ، 0=لاگین/ثبت‌نام، 1=پندینگ، 2=برنامه اصلی
                 var appState by remember { mutableStateOf(3) }
                 var selectedFeed by remember { mutableStateOf<Feed?>(null) }
                 val repository = remember { FeedRepository(applicationContext) }
+                
+                // آیا کاربر از قبل لاگین کرده؟ (برای اینکه هر بار صفحه لاگین نیاد)
+                var isLoggedIn by remember { mutableStateOf(LicenseManager.isActivated(context)) }
 
-                // موقع باز شدن برنامه، اول وضعیت رو از سرور چک می‌کنیم
                 LaunchedEffect(Unit) {
-                    val isStillActive = LicenseManager.checkUserStatus(context)
-                    if (isStillActive) {
-                        appState = 2 // تایید شده، برو به لیست فیدها
+                    if (LicenseManager.isActivated(context)) {
+                        // اگه قبلاً لاگین کرده بود، برو تو
+                        appState = 2
                     } else {
-                        // اگه تایید نشده یا پیدا نشد، بفرستش به ثبت‌نام
-                        // (اگه قبلاً ثبت‌نام کرده و پندینگه، بازم فرم میاد که شاید بخواد دوباره ثبت کنه، ولی معمولاً چون لایسنس رو چک کردیم، اگه پندینگ باشه می‌فهمیم)
-                        appState = 0 
+                        // اگه نکرده بود، برو صفحه لاگین
+                        appState = 0
                     }
                 }
 
@@ -69,11 +70,33 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     0 -> {
+                        // صفحه لاگین و ثبت‌نام
+                        if (isLoggedIn) {
+                            appState = 2 // (دوباره چک میکنیم)
+                        } else {
+                            LoginScreen(
+                                onLoginSuccess = {
+                                    LicenseManager.saveActivation(applicationContext, true)
+                                    isLoggedIn = true
+                                    appState = 2
+                                },
+                                onGoToRegister = {
+                                    // وقتی روی دکمه ثبت‌نام کلیک کرد، میره به فرم ثبت‌نام
+                                    appState = 4 
+                                }
+                            )
+                        }
+                    }
+                    4 -> {
+                        // صفحه ثبت‌نام
                         RegistrationScreen(
-                            onRegistrationSuccess = { appState = 1 }
+                            onRegistrationSuccess = {
+                                appState = 1 // برو به پندینگ
+                            }
                         )
                     }
                     1 -> {
+                        // صفحه انتظار
                         PendingScreen(
                             onApproved = {
                                 LicenseManager.saveActivation(applicationContext, true)
@@ -82,6 +105,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     2 -> {
+                        // برنامه اصلی
                         if (selectedFeed == null) {
                             FeedListScreen(
                                 repository = repository,
