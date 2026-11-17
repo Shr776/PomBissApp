@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -32,52 +33,87 @@ fun FeedCard(feed: Feed, onClick: () -> Unit) {
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = SurfaceDark.copy(alpha = 0.8f)),
-        // حاشیه کارت با رنگ تم اصلی
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             
-            // ۱. اسم ماهواره
+            // ۱. ردیف بالا: عنوان فید (چپ) و ماهواره (راست)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // عنوان فید (با هشتگ و رنگ صورتی/بنفش)
+                Text(
+                    text = if (feed.title.isNotBlank()) feed.title else "Unknown Event",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = NeonPink,
+                    modifier = Modifier.weight(1f)
+                )
+                
+                // اسم ماهواره (بزرگ و برجسته در سمت راست)
+                Text(
+                    text = feed.sat,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // ۲. مشخصات فرکانس (فرکانس بولد و بزرگ، بقیه رنگی)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // فرکانس (زرد و بولد)
+                Text(
+                    text = feed.freq, 
+                    fontSize = 22.sp, 
+                    fontWeight = FontWeight.ExtraBold, 
+                    color = NeonYellow
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "•", color = TextGray)
+                Spacer(modifier = Modifier.width(8.dp))
+                // سیمبولریت (سبز)
+                Text(
+                    text = feed.sr, 
+                    fontSize = 18.sp, 
+                    fontWeight = FontWeight.Bold, 
+                    color = NeonGreen
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "•", color = TextGray)
+                Spacer(modifier = Modifier.width(8.dp))
+                // پلاریزاسیون (آبی روشن)
+                Text(
+                    text = feed.pol, 
+                    fontSize = 18.sp, 
+                    fontWeight = FontWeight.Bold, 
+                    color = NeonCyan
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(6.dp))
+            
+            // ۳. اسم فید
             Text(
-                text = feed.sat,
+                text = if (feed.feedId.isNotBlank()) feed.feedId else "No Feed ID",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextWhite
             )
-            Spacer(modifier = Modifier.height(4.dp))
             
-            // ۲. مشخصات فرکانس، SR و پلاریزاسیون
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = feed.freq, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = NeonYellow)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "•", color = TextGray)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = feed.sr, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = NeonCyan)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "•", color = TextGray)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = feed.pol, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = NeonGreen)
-            }
+            Spacer(modifier = Modifier.height(8.dp))
             
-            Spacer(modifier = Modifier.height(4.dp))
-            
-            // ۳. اسم فید (با رنگ تم)
-            Text(
-                text = if (feed.feedId.isNotBlank()) feed.feedId else feed.title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary 
-            )
-            
-            Spacer(modifier = Modifier.height(6.dp))
-            
-            // ۴. ردیف کد فید و دکمه کپی و تاریخ
+            // ۴. ردیف پایین: کد فید، دکمه کپی و تاریخ
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    // کد فید (نارنجی)
                     Text(
                         text = feed.cw,
                         fontSize = 14.sp,
@@ -94,7 +130,6 @@ fun FeedCard(feed: Feed, onClick: () -> Unit) {
                         },
                         modifier = Modifier.size(24.dp)
                     ) {
-                        // دکمه کپی با رنگ تم
                         Icon(
                             imageVector = Icons.Default.ContentCopy,
                             contentDescription = "Copy",
@@ -108,6 +143,7 @@ fun FeedCard(feed: Feed, onClick: () -> Unit) {
             }
             
             Spacer(modifier = Modifier.height(4.dp))
+            // فرمت فید (خاکستری)
             Text(text = feed.type, fontSize = 13.sp, color = TextGray)
         }
     }
