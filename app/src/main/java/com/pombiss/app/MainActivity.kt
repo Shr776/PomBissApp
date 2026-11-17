@@ -47,16 +47,15 @@ class MainActivity : ComponentActivity() {
                 var selectedFeed by remember { mutableStateOf<Feed?>(null) }
                 val repository = remember { FeedRepository(applicationContext) }
 
+                // موقع باز شدن برنامه، اول وضعیت رو از سرور چک می‌کنیم
                 LaunchedEffect(Unit) {
-                    if (LicenseManager.isActivated(context)) {
-                        val isStillActive = LicenseManager.checkUserStatus(context)
-                        if (isStillActive) {
-                            appState = 2
-                        } else {
-                            appState = 1
-                        }
+                    val isStillActive = LicenseManager.checkUserStatus(context)
+                    if (isStillActive) {
+                        appState = 2 // تایید شده، برو به لیست فیدها
                     } else {
-                        appState = 0
+                        // اگه تایید نشده یا پیدا نشد، بفرستش به ثبت‌نام
+                        // (اگه قبلاً ثبت‌نام کرده و پندینگه، بازم فرم میاد که شاید بخواد دوباره ثبت کنه، ولی معمولاً چون لایسنس رو چک کردیم، اگه پندینگ باشه می‌فهمیم)
+                        appState = 0 
                     }
                 }
 
@@ -70,7 +69,6 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     0 -> {
-                        // صفحه ثبت‌نام جدید
                         RegistrationScreen(
                             onRegistrationSuccess = { appState = 1 }
                         )
