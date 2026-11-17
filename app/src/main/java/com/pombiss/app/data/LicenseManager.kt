@@ -27,14 +27,13 @@ object LicenseManager {
         return android.os.Build.BRAND ?: "Unknown"
     }
 
-    // تغییرات: برند و مدل رسیور از هم جدا شدن
     suspend fun registerDeviceWithDetails(
         context: Context,
         username: String,
         country: String,
         phoneModel: String,
-        receiverBrand: String, // جدا
-        receiverModel: String, // جدا
+        receiverBrand: String,
+        receiverModel: String,
         imageName: String,
         age: String,
         gender: String
@@ -57,8 +56,8 @@ object LicenseManager {
             jsonParam.put("username", username)
             jsonParam.put("phoneModel", phoneModel)
             jsonParam.put("country", country)
-            jsonParam.put("receiverBrand", receiverBrand) // ارسال برند جدا
-            jsonParam.put("receiverModel", receiverModel) // ارسال مدل جدا
+            jsonParam.put("receiverBrand", receiverBrand)
+            jsonParam.put("receiverModel", receiverModel)
             jsonParam.put("imageName", imageName)
             jsonParam.put("age", age)
             jsonParam.put("gender", gender)
@@ -75,6 +74,7 @@ object LicenseManager {
         }
     }
 
+    // تابع چک کردن وضعیت با قابلیت آفلاین
     suspend fun checkUserStatus(context: Context): Boolean = withContext(Dispatchers.IO) {
         val deviceId = getDeviceId(context)
         try {
@@ -108,11 +108,22 @@ object LicenseManager {
                 val userStatus = jsonResponse.optString("userStatus", "not_found")
                 
                 conn.disconnect()
-                return@withContext userStatus.equals("active", ignoreCase = true)
+                
+                // اگه وضعیت active بود، true برمی‌گردونه
+                if (userStatus.equals("active", ignoreCase = true)) {
+                    return@withContext true
+                }
+                // اگه وضعیت pending بود، false برمی‌گردونه (یعنی نباید وارد بشه)
+                if (userStatus.equals("pending", ignoreCase = true)) {
+                    return@withContext false
+                }
+                // اگه پیدا نشد (چون برنامه رو پاک کرده)، false برمی‌گردونه تا دوباره ثبت‌نام کنه
+                return@withContext false
             }
             conn.disconnect()
         } catch (e: Exception) {
             e.printStackTrace()
+            // اگه اینترنت قطع بود، از حافظه گوشی می‌خونه (تا کاربر آفلاین بتونه وارد بشه)
             return@withContext isActivated(context)
         }
         return@withContext false
