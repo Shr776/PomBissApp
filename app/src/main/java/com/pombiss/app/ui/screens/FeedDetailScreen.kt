@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -14,11 +15,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pombiss.app.R
 import com.pombiss.app.data.Feed
 import com.pombiss.app.ui.theme.*
 
@@ -26,6 +30,44 @@ import com.pombiss.app.ui.theme.*
 @Composable
 fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
     val context = LocalContext.current
+
+    // تشخیص هوشمند لوگو بر اساس کلمات کلیدی داخل عنوان فید
+    val logoResId = when {
+        // لیگ‌های معروف
+        feed.title.contains("UEFA", ignoreCase = true) -> R.drawable.logo_uefa
+        feed.title.contains("Premier League", ignoreCase = true) -> R.drawable.logo_premierleague
+        feed.title.contains("La Liga", ignoreCase = true) || feed.title.contains("LaLiga", ignoreCase = true) -> R.drawable.logo_laliga
+        feed.title.contains("Serie A", ignoreCase = true) -> R.drawable.logo_seriea
+        feed.title.contains("Bundesliga", ignoreCase = true) -> R.drawable.logo_bundesliga
+        feed.title.contains("Ligue 1", ignoreCase = true) -> R.drawable.logo_ligue1
+        feed.title.contains("Europa League", ignoreCase = true) -> R.drawable.logo_europaleague
+        feed.title.contains("World Cup", ignoreCase = true) -> R.drawable.logo_worldcup
+        feed.title.contains("Euro", ignoreCase = true) && !feed.title.contains("Europa", ignoreCase = true) -> R.drawable.logo_euro
+        feed.title.contains("Copa", ignoreCase = true) -> R.drawable.logo_copaamerica
+        feed.title.contains("AFC", ignoreCase = true) -> R.drawable.logo_afc
+        feed.title.contains("Saudi", ignoreCase = true) -> R.drawable.logo_saudileague
+        feed.title.contains("Egypt", ignoreCase = true) -> R.drawable.logo_egyptleague
+        feed.title.contains("Iran", ignoreCase = true) -> R.drawable.logo_iranleague
+
+        // ورزش‌های دیگر
+        feed.title.contains("CAF", ignoreCase = true) || feed.title.contains("African", ignoreCase = true) -> R.drawable.logo_caf
+        feed.title.contains("Tennis", ignoreCase = true) -> R.drawable.logo_tennis
+        feed.title.contains("Basketball", ignoreCase = true) -> R.drawable.logo_basketball
+        feed.title.contains("Handball", ignoreCase = true) -> R.drawable.logo_handball
+        feed.title.contains("Volleyball", ignoreCase = true) -> R.drawable.logo_volleyball
+        feed.title.contains("Water Sport", ignoreCase = true) -> R.drawable.logo_watersport
+        feed.title.contains("Motorsport", ignoreCase = true) -> R.drawable.logo_motorsport
+        feed.title.contains("Boxing", ignoreCase = true) -> R.drawable.logo_boxing
+        feed.title.contains("NFL", ignoreCase = true) -> R.drawable.logo_nfl
+        feed.title.contains("UFC", ignoreCase = true) -> R.drawable.logo_ufc
+        feed.title.contains("Darts", ignoreCase = true) -> R.drawable.logo_darts
+        feed.title.contains("Figure Skating", ignoreCase = true) -> R.drawable.logo_figureskating
+        
+        // فوتبال عمومی (اگه هیچ لیگ خاصی نبود)
+        feed.title.contains("Football", ignoreCase = true) -> R.drawable.logo_football
+        
+        else -> null // اگه پیدا نشد، لوگو نمایش داده نمیشه
+    }
 
     Scaffold(
         topBar = {
@@ -48,7 +90,18 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
                 .padding(horizontal = 16.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // ۱. عنوان فید (اضافه شد)
+            // نمایش لوگو
+            if (logoResId != null) {
+                Image(
+                    painter = painterResource(id = logoResId),
+                    contentDescription = "Sport Logo",
+                    modifier = Modifier.size(120.dp), 
+                    contentScale = ContentScale.Fit
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // عنوان فید
             Text(
                 text = feed.title,
                 fontSize = 26.sp,
@@ -60,7 +113,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
             
             Spacer(modifier = Modifier.height(12.dp))
 
-            // ۲. نام ماهواره
+            // نام ماهواره
             Text(
                 text = feed.sat,
                 fontSize = 24.sp,
@@ -72,7 +125,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
             
             Spacer(modifier = Modifier.height(24.dp))
 
-            // ۳. مشخصات فرکانس
+            // مشخصات فرکانس
             Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
                 Text(text = feed.freq, fontSize = 34.sp, fontWeight = FontWeight.Black, color = NeonYellow)
                 Spacer(modifier = Modifier.width(10.dp))
@@ -87,7 +140,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // ۴. اسم فید
+            // اسم فید
             Text(
                 text = if (feed.feedId.isNotBlank()) feed.feedId else "No Feed ID",
                 fontSize = 20.sp,
@@ -98,7 +151,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ۵. فرمت
+            // فرمت
             Text(
                 text = feed.type,
                 fontSize = 18.sp,
@@ -108,7 +161,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // ۶. کد فید و دکمه کپی
+            // کد فید و دکمه کپی
             Card(
                 colors = CardDefaults.cardColors(containerColor = SurfaceDark),
                 shape = RoundedCornerShape(8.dp),
@@ -140,7 +193,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ۷. تاریخ
+            // تاریخ
             Text(text = feed.datetime, fontSize = 16.sp, color = TextGray)
 
             Spacer(modifier = Modifier.weight(1f))
