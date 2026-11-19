@@ -18,47 +18,46 @@ object FeedParser {
 
         val cw = parts.getOrNull(1) ?: ""
         
-        // --- منطق جدید و هوشمند برای کوتاه کردن عنوان ---
+        // --- منطق قوی برای کوتاه کردن عنوان ---
         var rawTitle = parts.getOrNull(2) ?: ""
         
-        // ۱. اگه علامت @ داشت، از همون جا به بعد رو کات کن
-        if (rawTitle.contains("@")) {
-            rawTitle = rawTitle.substringBefore("@").trim()
+        // ۱. حذف هشتگ از اول
+        if (rawTitle.startsWith("#")) {
+            rawTitle = rawTitle.substring(1).trim()
         }
         
-        // ۲. اگه پرانتز داشت، از همون جا کات کن
-        if (rawTitle.contains("(")) {
-            rawTitle = rawTitle.substringBefore("(").trim()
-        }
+        // ۲. اگه علامت @ یا پرانتز داشت، از همون جا به بعد رو کات کن
+        if (rawTitle.contains("@")) rawTitle = rawTitle.substringBefore("@").trim()
+        if (rawTitle.contains("(")) rawTitle = rawTitle.substringBefore("(").trim()
         
-        // ۳. لیست کلمات کلیدی ورزشی که اگه دیده شدن، بقیه متن حذف بشه
-        val sportKeywords = listOf("Football", "Tennis", "Basketball", "Handball", "Water Sport", "Motorsport", "Boxing", "Cricket", "Rugby", "NFL", "UFC")
+        // ۳. لیست کلمات کلیدی ورزشی (دقیقاً همونایی که توی فایل هستن)
+        val sportKeywords = listOf(
+            "Football", "Tennis", "Basketball", "Handball", 
+            "Water Sport", "Motorsport", "Boxing", "Cricket", "Rugby", "NFL", "UFC", "Darts",
+            "Figure Skating", "UEFA Champions League", "UEFA", "NHL"
+        )
+        
+        var foundKeyword = false
         for (keyword in sportKeywords) {
-            val lowerTitle = rawTitle.lowercase()
-            val lowerKeyword = keyword.lowercase()
-            if (lowerTitle.contains(lowerKeyword)) {
-                val index = lowerTitle.indexOf(lowerKeyword)
+            // چک می‌کنیم که کلمه کلیدی توی عنوان باشه
+            if (rawTitle.contains(keyword, ignoreCase = true)) {
+                // اگه بود، فقط تا آخر همون کلمه رو نگه می‌داریم و بقیه رو کات می‌کنیم
+                val index = rawTitle.indexOf(keyword, ignoreCase = true)
                 rawTitle = rawTitle.substring(0, index + keyword.length).trim()
-                break
+                foundKeyword = true
+                break // دیگه بقیه کلمات رو چک نکن
             }
         }
         
-        // ۴. اگه کلمه Feeds یا incomplete توش بود، کات کن (رفع خطای خط 47)
-        val lowerTitleForFeeds = rawTitle.lowercase()
-        if (lowerTitleForFeeds.contains("feeds")) {
-            val index = lowerTitleForFeeds.indexOf("feeds")
-            rawTitle = rawTitle.substring(0, index).trim()
-        }
-        
-        // ۵. اگه هنوز طولانی بود، با سه نقطه کوتاهش کن
-        if (rawTitle.length > 25) {
+        // ۴. اگه هیچ کلمه کلیدی پیدا نشد، عنوان رو دست نمی‌زنیم (یا حداکثر ۲۵ کاراکتر کوتاهش می‌کنیم)
+        if (!foundKeyword && rawTitle.length > 25) {
             rawTitle = rawTitle.take(25) + "..."
         }
         
         val title = if (rawTitle.isBlank()) "Live Feed" else rawTitle
         // -------------------------------------------------
 
-        // --- منطق کوتاه کردن اسم ماهواره ---
+        // --- کوتاه کردن اسم ماهواره ---
         var sat = parts.getOrNull(3) ?: ""
         if (sat.contains("(")) {
             sat = sat.substringAfter("(").substringBefore(")").trim()
