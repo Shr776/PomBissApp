@@ -18,26 +18,48 @@ object FeedParser {
 
         val cw = parts.getOrNull(1) ?: ""
         
-        // --- شروع منطق کوتاه کردن عنوان ---
+        // --- منطق جدید و هوشمند برای کوتاه کردن عنوان ---
         var rawTitle = parts.getOrNull(2) ?: ""
-        // اگه پرانتز داشت، فقط تا قبل از پرانتز رو بردار
+        
+        // ۱. اگه علامت @ داشت، از همون جا به بعد رو کات کن (مثل Egyptian Football @10...)
+        if (rawTitle.contains("@")) {
+            rawTitle = rawTitle.substringBefore("@").trim()
+        }
+        
+        // ۲. اگه پرانتز داشت، از همون جا کات کن
         if (rawTitle.contains("(")) {
             rawTitle = rawTitle.substringBefore("(").trim()
         }
-        // اگه فاصله داشت و کلمه اول با هشتگ بود، فقط کلمه اول رو بردار
-        if (rawTitle.startsWith("#") && rawTitle.contains(" ")) {
-            rawTitle = rawTitle.split(" ")[0]
+        
+        // ۳. لیست کلمات کلیدی ورزشی که اگه دیده شدن، بقیه متن حذف بشه
+        val sportKeywords = listOf("Football", "Tennis", "Basketball", "Handball", "Water Sport", "Motorsport", "Boxing", "Cricket", "Rugby", "NFL", "UFC")
+        for (keyword in sportKeywords) {
+            val index = rawTitle.indexOf(keyword, ignoreCase = true)
+            if (index != -1) {
+                // فقط تا آخر همون کلمه رو نگه دار
+                rawTitle = rawTitle.substring(0, index + keyword.length).trim()
+                break
+            }
         }
-        val title = rawTitle.trim()
-        // -----------------------------------
+        
+        // ۴. اگه کلمه Feeds یا incomplete توش بود، کات کن
+        if (rawTitle.contains("Feeds", ignoreCase = true)) {
+            rawTitle = rawTitle.substringBefore("Feeds", ignoreCase = true).trim()
+        }
+        
+        // ۵. اگه هنوز طولانی بود (بیشتر از ۲۵ کاراکتر)، با سه نقطه کوتاهش کن
+        if (rawTitle.length > 25) {
+            rawTitle = rawTitle.take(25) + "..."
+        }
+        
+        val title = if (rawTitle.isBlank()) "Live Feed" else rawTitle
+        // -------------------------------------------------
 
-        // --- شروع منطق کوتاه کردن اسم ماهواره ---
+        // --- منطق کوتاه کردن اسم ماهواره ---
         var sat = parts.getOrNull(3) ?: ""
-        // اگه اسم ماهواره طولانی بود (مثل HotBird 13F/13G ( 13E ))، فقط قسمت داخل پرانتز (13E) رو بردار
         if (sat.contains("(")) {
             sat = sat.substringAfter("(").substringBefore(")").trim()
         }
-        // اگه هنوز طولانی بود، کوتاهش کن
         if (sat.length > 7) {
             sat = sat.take(7) + "..."
         }
