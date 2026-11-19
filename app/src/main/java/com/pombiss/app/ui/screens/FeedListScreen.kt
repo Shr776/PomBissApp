@@ -3,7 +3,7 @@ package com.pombiss.app.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed // تغییر به itemsIndexed برای گرفتن شماره
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 fun FeedListScreen(
     repository: FeedRepository,
     onFeedClick: (Feed) -> Unit,
-    onSettingsClick: () -> Unit // پارامتر جدید برای رفتن به تنظیمات
+    onSettingsClick: () -> Unit
 ) {
     var feeds by remember { mutableStateOf<List<Feed>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
@@ -77,7 +77,7 @@ fun FeedListScreen(
                 showSearchBar = !showSearchBar 
                 if (!showSearchBar) searchQuery = ""
             },
-            onSettingsClick = onSettingsClick // وصل کردن دکمه تنظیمات به هدر
+            onSettingsClick = onSettingsClick
         )
 
         if (showSearchBar) {
@@ -123,8 +123,13 @@ fun FeedListScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = 16.dp)
                 ) {
-                    items(filteredFeeds) { feed ->
-                        FeedCard(feed = feed, onClick = { onFeedClick(feed) })
+                    // استفاده از itemsIndexed برای گرفتن شماره ایندکس
+                    itemsIndexed(filteredFeeds) { index, feed ->
+                        FeedCard(
+                            feed = feed, 
+                            index = index, // ارسال ایندکس
+                            onClick = { onFeedClick(feed) }
+                        )
                     }
                     
                     item {
