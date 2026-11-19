@@ -31,26 +31,32 @@ import com.pombiss.app.ui.theme.*
 fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
     val context = LocalContext.current
 
-    // تشخیص هوشمند لوگو بر اساس کلمات کلیدی داخل عنوان فید
+    // تشخیص هوشمند لوگو بر اساس کلمات کلیدی
     val logoResId = when {
-        // لیگ‌های معروف
-        feed.title.contains("UEFA", ignoreCase = true) -> R.drawable.logo_uefa
+        // ۱. لیگ‌های باشگاهی و ملی
+        feed.title.contains("UEFA", ignoreCase = true) && !feed.title.contains("Europa", ignoreCase = true) && !feed.title.contains("Nations", ignoreCase = true) -> R.drawable.logo_uefa
+        feed.title.contains("Europa League", ignoreCase = true) -> R.drawable.logo_europaleague
+        feed.title.contains("Nations League", ignoreCase = true) -> R.drawable.logo_uefa // (چون لوگوی اختصاصی نداری فعلا از یوفا استفاده میکنیم)
+        
         feed.title.contains("Premier League", ignoreCase = true) -> R.drawable.logo_premierleague
         feed.title.contains("La Liga", ignoreCase = true) || feed.title.contains("LaLiga", ignoreCase = true) -> R.drawable.logo_laliga
         feed.title.contains("Serie A", ignoreCase = true) -> R.drawable.logo_seriea
         feed.title.contains("Bundesliga", ignoreCase = true) -> R.drawable.logo_bundesliga
         feed.title.contains("Ligue 1", ignoreCase = true) -> R.drawable.logo_ligue1
-        feed.title.contains("Europa League", ignoreCase = true) -> R.drawable.logo_europaleague
-        feed.title.contains("World Cup", ignoreCase = true) -> R.drawable.logo_worldcup
+        
+        // ۲. جام‌های ملی
+        feed.title.contains("World Cup", ignoreCase = true) || feed.title.contains("FIFA", ignoreCase = true) -> R.drawable.logo_worldcup
         feed.title.contains("Euro", ignoreCase = true) && !feed.title.contains("Europa", ignoreCase = true) -> R.drawable.logo_euro
-        feed.title.contains("Copa", ignoreCase = true) -> R.drawable.logo_copaamerica
-        feed.title.contains("AFC", ignoreCase = true) -> R.drawable.logo_afc
+        feed.title.contains("Copa", ignoreCase = true) || feed.title.contains("CONMEBOL", ignoreCase = true) -> R.drawable.logo_copaamerica
+        
+        // ۳. لیگ‌های منطقه‌ای
+        feed.title.contains("AFC", ignoreCase = true) || feed.title.contains("Asian", ignoreCase = true) -> R.drawable.logo_afc
+        feed.title.contains("CAF", ignoreCase = true) || feed.title.contains("African", ignoreCase = true) -> R.drawable.logo_caf
         feed.title.contains("Saudi", ignoreCase = true) -> R.drawable.logo_saudileague
         feed.title.contains("Egypt", ignoreCase = true) -> R.drawable.logo_egyptleague
         feed.title.contains("Iran", ignoreCase = true) -> R.drawable.logo_iranleague
 
-        // ورزش‌های دیگر
-        feed.title.contains("CAF", ignoreCase = true) || feed.title.contains("African", ignoreCase = true) -> R.drawable.logo_caf
+        // ۴. ورزش‌های دیگر
         feed.title.contains("Tennis", ignoreCase = true) -> R.drawable.logo_tennis
         feed.title.contains("Basketball", ignoreCase = true) -> R.drawable.logo_basketball
         feed.title.contains("Handball", ignoreCase = true) -> R.drawable.logo_handball
@@ -63,10 +69,10 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
         feed.title.contains("Darts", ignoreCase = true) -> R.drawable.logo_darts
         feed.title.contains("Figure Skating", ignoreCase = true) -> R.drawable.logo_figureskating
         
-        // فوتبال عمومی (اگه هیچ لیگ خاصی نبود)
+        // ۵. فوتبال عمومی (اگه هیچی پیدا نشد)
         feed.title.contains("Football", ignoreCase = true) -> R.drawable.logo_football
         
-        else -> null // اگه پیدا نشد، لوگو نمایش داده نمیشه
+        else -> null
     }
 
     Scaffold(
@@ -90,7 +96,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
                 .padding(horizontal = 16.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // نمایش لوگو
+            // نمایش لوگو (فقط اگه وجود داشته باشه)
             if (logoResId != null) {
                 Image(
                     painter = painterResource(id = logoResId),
