@@ -21,7 +21,7 @@ object FeedParser {
         // --- منطق جدید و هوشمند برای کوتاه کردن عنوان ---
         var rawTitle = parts.getOrNull(2) ?: ""
         
-        // ۱. اگه علامت @ داشت، از همون جا به بعد رو کات کن (مثل Egyptian Football @10...)
+        // ۱. اگه علامت @ داشت، از همون جا به بعد رو کات کن
         if (rawTitle.contains("@")) {
             rawTitle = rawTitle.substringBefore("@").trim()
         }
@@ -34,20 +34,23 @@ object FeedParser {
         // ۳. لیست کلمات کلیدی ورزشی که اگه دیده شدن، بقیه متن حذف بشه
         val sportKeywords = listOf("Football", "Tennis", "Basketball", "Handball", "Water Sport", "Motorsport", "Boxing", "Cricket", "Rugby", "NFL", "UFC")
         for (keyword in sportKeywords) {
-            val index = rawTitle.indexOf(keyword, ignoreCase = true)
-            if (index != -1) {
-                // فقط تا آخر همون کلمه رو نگه دار
+            val lowerTitle = rawTitle.lowercase()
+            val lowerKeyword = keyword.lowercase()
+            if (lowerTitle.contains(lowerKeyword)) {
+                val index = lowerTitle.indexOf(lowerKeyword)
                 rawTitle = rawTitle.substring(0, index + keyword.length).trim()
                 break
             }
         }
         
-        // ۴. اگه کلمه Feeds یا incomplete توش بود، کات کن
-        if (rawTitle.contains("Feeds", ignoreCase = true)) {
-            rawTitle = rawTitle.substringBefore("Feeds", ignoreCase = true).trim()
+        // ۴. اگه کلمه Feeds یا incomplete توش بود، کات کن (رفع خطای خط 47)
+        val lowerTitleForFeeds = rawTitle.lowercase()
+        if (lowerTitleForFeeds.contains("feeds")) {
+            val index = lowerTitleForFeeds.indexOf("feeds")
+            rawTitle = rawTitle.substring(0, index).trim()
         }
         
-        // ۵. اگه هنوز طولانی بود (بیشتر از ۲۵ کاراکتر)، با سه نقطه کوتاهش کن
+        // ۵. اگه هنوز طولانی بود، با سه نقطه کوتاهش کن
         if (rawTitle.length > 25) {
             rawTitle = rawTitle.take(25) + "..."
         }
