@@ -18,46 +18,35 @@ object FeedParser {
 
         val cw = parts.getOrNull(1) ?: ""
         
-        // --- منطق قوی برای کوتاه کردن عنوان ---
         var rawTitle = parts.getOrNull(2) ?: ""
         
-        // ۱. حذف هشتگ از اول
-        if (rawTitle.startsWith("#")) {
-            rawTitle = rawTitle.substring(1).trim()
-        }
-        
-        // ۲. اگه علامت @ یا پرانتز داشت، از همون جا به بعد رو کات کن
+        if (rawTitle.startsWith("#")) rawTitle = rawTitle.substring(1).trim()
         if (rawTitle.contains("@")) rawTitle = rawTitle.substringBefore("@").trim()
         if (rawTitle.contains("(")) rawTitle = rawTitle.substringBefore("(").trim()
         
-        // ۳. لیست کلمات کلیدی ورزشی (دقیقاً همونایی که توی فایل هستن)
+        // لیست کلمات کلیدی رو کامل‌تر کردم و به حالت‌های مختلف (Handbal, Vollyball و...) حساس نیست
         val sportKeywords = listOf(
-            "Football", "Tennis", "Basketball", "Handball", 
+            "Football", "Tennis", "Basketball", "Handbal", "Vollyball", "Volleyball", 
             "Water Sport", "Motorsport", "Boxing", "Cricket", "Rugby", "NFL", "UFC", "Darts",
-            "Figure Skating", "UEFA Champions League", "UEFA", "NHL"
+            "Figure Skating", "UEFA Champions League", "UEFA", "NHL", "MotoGP", "Formula"
         )
         
         var foundKeyword = false
         for (keyword in sportKeywords) {
-            // چک می‌کنیم که کلمه کلیدی توی عنوان باشه
             if (rawTitle.contains(keyword, ignoreCase = true)) {
-                // اگه بود، فقط تا آخر همون کلمه رو نگه می‌داریم و بقیه رو کات می‌کنیم
                 val index = rawTitle.indexOf(keyword, ignoreCase = true)
                 rawTitle = rawTitle.substring(0, index + keyword.length).trim()
                 foundKeyword = true
-                break // دیگه بقیه کلمات رو چک نکن
+                break 
             }
         }
         
-        // ۴. اگه هیچ کلمه کلیدی پیدا نشد، عنوان رو دست نمی‌زنیم (یا حداکثر ۲۵ کاراکتر کوتاهش می‌کنیم)
         if (!foundKeyword && rawTitle.length > 25) {
             rawTitle = rawTitle.take(25) + "..."
         }
         
         val title = if (rawTitle.isBlank()) "Live Feed" else rawTitle
-        // -------------------------------------------------
 
-        // --- کوتاه کردن اسم ماهواره ---
         var sat = parts.getOrNull(3) ?: ""
         if (sat.contains("(")) {
             sat = sat.substringAfter("(").substringBefore(")").trim()
@@ -65,7 +54,6 @@ object FeedParser {
         if (sat.length > 7) {
             sat = sat.take(7) + "..."
         }
-        // -------------------------------------
 
         val type = parts.getOrNull(4) ?: ""
         val feedId = parts.getOrNull(5) ?: ""
