@@ -24,7 +24,7 @@ import com.pombiss.app.data.Feed
 import com.pombiss.app.ui.theme.*
 
 @Composable
-fun FeedCard(feed: Feed, onClick: () -> Unit) {
+fun FeedCard(feed: Feed, index: Int, onClick: () -> Unit) { // پارامتر index اضافه شد
     val context = LocalContext.current
 
     Card(
@@ -44,11 +44,11 @@ fun FeedCard(feed: Feed, onClick: () -> Unit) {
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                // ردیف شماره فید و عنوان در یک خط
+                // ردیف شماره و عنوان
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // شماره فید سمت چپ
+                    // شماره لیست (از ۱ شروع میشه)
                     Text(
-                        text = "#${feed.position}",
+                        text = "${index + 1}.", // شماره لیست
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
