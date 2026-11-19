@@ -31,6 +31,7 @@ import com.pombiss.app.ui.theme.*
 fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
     val context = LocalContext.current
 
+    // تشخیص هوشمند لوگو
     val logoResId = when {
         feed.title.contains("UEFA", ignoreCase = true) && !feed.title.contains("Europa", ignoreCase = true) && !feed.title.contains("Nations", ignoreCase = true) -> R.drawable.logo_uefa
         feed.title.contains("Europa League", ignoreCase = true) -> R.drawable.logo_europaleague
@@ -54,24 +55,16 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
         feed.title.contains("Tennis", ignoreCase = true) -> R.drawable.logo_tennis
         feed.title.contains("Basketball", ignoreCase = true) -> R.drawable.logo_basketball
-        
-        // حالا هم Handbal و هم Handball رو می‌شناسه
         feed.title.contains("Handbal", ignoreCase = true) -> R.drawable.logo_handball
-        
-        // حالا هم Vollyball و هم Volleyball رو می‌شناسه
         feed.title.contains("Vollyball", ignoreCase = true) || feed.title.contains("Volleyball", ignoreCase = true) -> R.drawable.logo_volleyball
-        
         feed.title.contains("Darts", ignoreCase = true) -> R.drawable.logo_darts
         feed.title.contains("Figure Skating", ignoreCase = true) -> R.drawable.logo_figureskating
-        
         feed.title.contains("Water Sport", ignoreCase = true) -> R.drawable.logo_watersport
         feed.title.contains("Motorsport", ignoreCase = true) -> R.drawable.logo_motorsport
         feed.title.contains("Boxing", ignoreCase = true) -> R.drawable.logo_boxing
         feed.title.contains("NFL", ignoreCase = true) -> R.drawable.logo_nfl
         feed.title.contains("UFC", ignoreCase = true) -> R.drawable.logo_ufc
-        
         feed.title.contains("Football", ignoreCase = true) -> R.drawable.logo_football
-        
         else -> null
     }
 
@@ -191,9 +184,40 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
             // ۷. تاریخ
             Text(text = feed.datetime, fontSize = 16.sp, color = TextGray)
 
+            // ۸. نمایش اطلاعات اضافی (Event/Teams)
+            // اگر فیلد event خالی نبود، اون رو نشون بده
+            if (feed.event.isNotBlank()) {
+                Spacer(modifier = Modifier.height(24.dp))
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = SurfaceDark.copy(alpha = 0.5f)),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Match Info",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextGray,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        Text(
+                            text = feed.event,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextWhite,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
 
-            // ۸. لوگو (حالا پایین اومده)
+            // ۹. لوگو
             if (logoResId != null) {
                 Image(
                     painter = painterResource(id = logoResId),
