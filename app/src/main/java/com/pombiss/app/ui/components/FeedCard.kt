@@ -44,13 +44,26 @@ fun FeedCard(feed: Feed, onClick: () -> Unit) {
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                // عنوان فید
-                Text(
-                    text = feed.title,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextWhite
-                )
+                // ردیف شماره فید و عنوان در یک خط
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // شماره فید سمت چپ
+                    Text(
+                        text = "#${feed.position}",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    
+                    // عنوان فید
+                    Text(
+                        text = feed.title,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextWhite
+                    )
+                }
+                
                 Spacer(modifier = Modifier.height(6.dp))
 
                 // فرکانس، SR و پلاریزاسیون
@@ -70,7 +83,7 @@ fun FeedCard(feed: Feed, onClick: () -> Unit) {
                 
                 // اسم فید
                 Text(
-                    text = if (feed.feedId.isNotBlank()) feed.feedId else feed.title,
+                    text = if (feed.feedId.isNotBlank()) feed.feedId else "No Feed ID",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -112,25 +125,25 @@ fun FeedCard(feed: Feed, onClick: () -> Unit) {
             VerticalDivider(
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .height(70.dp), // ارتفاعش رو یه کوچولو کمتر کردم که با محتوا هم‌تراز باشه
+                    .height(70.dp),
                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
                 thickness = 1.dp
             )
 
-            // ماهواره (با فونت کوچیک‌تر و فاصله مناسب)
+            // ماهواره
             Box(
                 modifier = Modifier
                     .width(70.dp)
-                    .padding(vertical = 4.dp), // فاصله از بالا و پایین
+                    .padding(vertical = 4.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = feed.sat,
-                    fontSize = 28.sp, // از 34 به 28 کاهش دادم
+                    fontSize = 28.sp,
                     fontWeight = FontWeight.Black,
                     color = MaterialTheme.colorScheme.primary,
                     textAlign = TextAlign.Center,
-                    lineHeight = 30.sp // فاصله خطوط رو تنظیم کردم
+                    lineHeight = 30.sp
                 )
             }
         }
