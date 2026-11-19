@@ -36,7 +36,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
         // ۱. لیگ‌های باشگاهی و ملی
         feed.title.contains("UEFA", ignoreCase = true) && !feed.title.contains("Europa", ignoreCase = true) && !feed.title.contains("Nations", ignoreCase = true) -> R.drawable.logo_uefa
         feed.title.contains("Europa League", ignoreCase = true) -> R.drawable.logo_europaleague
-        feed.title.contains("Nations League", ignoreCase = true) -> R.drawable.logo_uefa // (چون لوگوی اختصاصی نداری فعلا از یوفا استفاده میکنیم)
+        feed.title.contains("Nations League", ignoreCase = true) -> R.drawable.logo_uefa 
         
         feed.title.contains("Premier League", ignoreCase = true) -> R.drawable.logo_premierleague
         feed.title.contains("La Liga", ignoreCase = true) || feed.title.contains("LaLiga", ignoreCase = true) -> R.drawable.logo_laliga
@@ -61,15 +61,17 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
         feed.title.contains("Basketball", ignoreCase = true) -> R.drawable.logo_basketball
         feed.title.contains("Handball", ignoreCase = true) -> R.drawable.logo_handball
         feed.title.contains("Volleyball", ignoreCase = true) -> R.drawable.logo_volleyball
+        feed.title.contains("Darts", ignoreCase = true) -> R.drawable.logo_darts
+        feed.title.contains("Figure Skating", ignoreCase = true) -> R.drawable.logo_figureskating
+        
+        // ۵. بقیه ورزش‌ها (که الان عکسشون رو آپلود کردی)
         feed.title.contains("Water Sport", ignoreCase = true) -> R.drawable.logo_watersport
         feed.title.contains("Motorsport", ignoreCase = true) -> R.drawable.logo_motorsport
         feed.title.contains("Boxing", ignoreCase = true) -> R.drawable.logo_boxing
         feed.title.contains("NFL", ignoreCase = true) -> R.drawable.logo_nfl
         feed.title.contains("UFC", ignoreCase = true) -> R.drawable.logo_ufc
-        feed.title.contains("Darts", ignoreCase = true) -> R.drawable.logo_darts
-        feed.title.contains("Figure Skating", ignoreCase = true) -> R.drawable.logo_figureskating
         
-        // ۵. فوتبال عمومی (اگه هیچی پیدا نشد)
+        // ۶. فوتبال عمومی (اگه هیچ کدوم از لیگ‌ها نبود)
         feed.title.contains("Football", ignoreCase = true) -> R.drawable.logo_football
         
         else -> null
@@ -96,7 +98,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
                 .padding(horizontal = 16.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // نمایش لوگو (فقط اگه وجود داشته باشه)
+            // نمایش لوگو
             if (logoResId != null) {
                 Image(
                     painter = painterResource(id = logoResId),
