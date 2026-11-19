@@ -97,7 +97,7 @@ fun FeedCard(feed: Feed, onClick: () -> Unit) {
                 
                 Spacer(modifier = Modifier.height(6.dp))
                 
-                // حالا تاریخ و فرمت کنار هم هستن
+                // تاریخ و فرمت
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -112,20 +112,27 @@ fun FeedCard(feed: Feed, onClick: () -> Unit) {
             VerticalDivider(
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .height(80.dp),
+                    .height(70.dp), // ارتفاعش رو یه کوچولو کمتر کردم که با محتوا هم‌تراز باشه
                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
                 thickness = 1.dp
             )
 
-            // ماهواره بزرگ‌تر و بازتر
-            Text(
-                text = feed.sat,
-                fontSize = 34.sp, // بزرگ‌ترش کردم
-                fontWeight = FontWeight.Black,
-                color = MaterialTheme.colorScheme.primary,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.width(80.dp) // فضای بیشتری بهش دادم
-            )
+            // ماهواره (با فونت کوچیک‌تر و فاصله مناسب)
+            Box(
+                modifier = Modifier
+                    .width(70.dp)
+                    .padding(vertical = 4.dp), // فاصله از بالا و پایین
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = feed.sat,
+                    fontSize = 28.sp, // از 34 به 28 کاهش دادم
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 30.sp // فاصله خطوط رو تنظیم کردم
+                )
+            }
         }
     }
 }
