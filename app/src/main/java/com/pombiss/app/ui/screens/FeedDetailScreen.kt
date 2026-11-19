@@ -48,19 +48,31 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
                 .padding(horizontal = 16.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // نام ماهواره
+            // ۱. عنوان فید (اضافه شد)
+            Text(
+                text = feed.title,
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                lineHeight = 32.sp
+            )
+            
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // ۲. نام ماهواره
             Text(
                 text = feed.sat,
-                fontSize = 28.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextWhite,
                 textAlign = TextAlign.Center,
-                lineHeight = 36.sp
+                lineHeight = 30.sp
             )
             
             Spacer(modifier = Modifier.height(24.dp))
 
-            // مشخصات فرکانس، SR و پلاریزاسیون
+            // ۳. مشخصات فرکانس
             Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
                 Text(text = feed.freq, fontSize = 34.sp, fontWeight = FontWeight.Black, color = NeonYellow)
                 Spacer(modifier = Modifier.width(10.dp))
@@ -75,18 +87,18 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // اسم فید (با رنگ تم)
+            // ۴. اسم فید
             Text(
-                text = if (feed.feedId.isNotBlank()) feed.feedId else feed.title,
-                fontSize = 24.sp,
+                text = if (feed.feedId.isNotBlank()) feed.feedId else "No Feed ID",
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
+                color = TextWhite,
                 textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // فرمت
+            // ۵. فرمت
             Text(
                 text = feed.type,
                 fontSize = 18.sp,
@@ -96,7 +108,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // کد فید (CW) با طراحی برجسته و دکمه کپی (با رنگ تم)
+            // ۶. کد فید و دکمه کپی
             Card(
                 colors = CardDefaults.cardColors(containerColor = SurfaceDark),
                 shape = RoundedCornerShape(8.dp),
@@ -128,12 +140,8 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // تاریخ و ساعت
-            Text(
-                text = feed.datetime,
-                fontSize = 16.sp,
-                color = TextGray
-            )
+            // ۷. تاریخ
+            Text(text = feed.datetime, fontSize = 16.sp, color = TextGray)
 
             Spacer(modifier = Modifier.weight(1f))
 
