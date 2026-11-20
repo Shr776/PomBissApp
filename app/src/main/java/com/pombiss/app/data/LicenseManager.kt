@@ -40,7 +40,28 @@ object LicenseManager {
         return android.os.Build.BRAND ?: "Unknown"
     }
 
-    // تابع لاگین
+    // ذخیره و خواندن یوزرنیم
+    fun saveUsername(context: Context, username: String) {
+        val prefs = context.getSharedPreferences("PomBissPrefs", Context.MODE_PRIVATE)
+        prefs.edit().putString("username", username).apply()
+    }
+
+    fun getUsername(context: Context): String {
+        val prefs = context.getSharedPreferences("PomBissPrefs", Context.MODE_PRIVATE)
+        return prefs.getString("username", "User") ?: "User"
+    }
+
+    // ذخیره و خواندن کد کشور (مثلا IR, US, TR)
+    fun saveCountryCode(context: Context, countryCode: String) {
+        val prefs = context.getSharedPreferences("PomBissPrefs", Context.MODE_PRIVATE)
+        prefs.edit().putString("country_code", countryCode).apply()
+    }
+
+    fun getCountryCode(context: Context): String {
+        val prefs = context.getSharedPreferences("PomBissPrefs", Context.MODE_PRIVATE)
+        return prefs.getString("country_code", "IR") ?: "IR"
+    }
+
     suspend fun loginUser(context: Context, username: String, password: String): Boolean = withContext(Dispatchers.IO) {
         try {
             val conn = URL(SCRIPT_URL).openConnection() as HttpURLConnection
@@ -76,8 +97,8 @@ object LicenseManager {
                 
                 conn.disconnect()
                 
-                // اگه لاگین موفق بود و وضعیت active بود
                 if (status == "success" && userStatus.equals("active", ignoreCase = true)) {
+                    saveUsername(context, username)
                     return@withContext true
                 }
             }
@@ -91,7 +112,7 @@ object LicenseManager {
     suspend fun registerDeviceWithDetails(
         context: Context,
         username: String,
-        password: String, // پسورد جدید
+        password: String,
         country: String,
         phoneModel: String,
         receiverBrand: String,
@@ -116,7 +137,7 @@ object LicenseManager {
             jsonParam.put("deviceId", deviceId)
             jsonParam.put("brand", brand)
             jsonParam.put("username", username)
-            jsonParam.put("password", password) // ارسال پسورد
+            jsonParam.put("password", password)
             jsonParam.put("phoneModel", phoneModel)
             jsonParam.put("country", country)
             jsonParam.put("receiverBrand", receiverBrand)
@@ -132,6 +153,8 @@ object LicenseManager {
 
             conn.responseCode
             conn.disconnect()
+            
+            saveUsername(context, username)
         } catch (e: Exception) {
             e.printStackTrace()
         }
