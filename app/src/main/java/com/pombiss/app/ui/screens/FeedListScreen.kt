@@ -1,5 +1,8 @@
 package com.pombiss.app.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -7,6 +10,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,12 +43,18 @@ fun FeedListScreen(
     var searchQuery by remember { mutableStateOf("") }
     
     var showFavoritesOnly by remember { mutableStateOf(false) }
-    
-    // استفاده از getFavorites برای ذخیره آیدی‌های یکتا
     var favoriteIds by remember { mutableStateOf(FavoritesManager.getFavorites(context)) }
 
+    // حفظ موقعیت اسکرول
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
+
+    // چک کردن اینکه کاربر از بالای صفحه فاصله گرفته یا نه (برای نمایش دکمه شناور)
+    val showScrollToTopButton by remember {
+        derivedStateOf {
+            listState.firstVisibleItemIndex > 3 // اگه از فید ۴ به بعد جلوتر رفتیم، دکمه رو نشون بده
+        }
+    }
 
     fun loadFeeds(force: Boolean) {
         scope.launch {
@@ -54,7 +64,6 @@ fun FeedListScreen(
                 val newFeeds = repository.getFeeds(forceRefresh = force)
                 feeds = newFeeds
                 
-                // حذف فیدهایی که دیگه توی لیست نیستن از فیووریت
                 val currentFeedIds = newFeeds.map { "${it.freq}_${it.pol}_${it.sr}_${it.datetime}".replace(" ", "") }.toSet()
                 val currentFavorites = FavoritesManager.getFavorites(context).toMutableSet()
                 currentFavorites.retainAll(currentFeedIds)
@@ -87,7 +96,6 @@ fun FeedListScreen(
         }
     }
 
-    // فیلتر کردن برای فیووریت
     val displayedFeeds = if (showFavoritesOnly) {
         searchedFeeds.filter { feed ->
             val uniqueId = "${feed.freq}_${feed.pol}_${feed.sr}_${feed.datetime}".replace(" ", "")
@@ -97,99 +105,120 @@ fun FeedListScreen(
         searchedFeeds
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(DarkBackground)
-    ) {
-        HeaderBar(
-            feedCount = displayedFeeds.size,
-            onRefreshClick = { loadFeeds(true) },
-            onSearchClick = { 
-                showSearchBar = !showSearchBar 
-                if (!showSearchBar) searchQuery = ""
-            },
-            onSettingsClick = onSettingsClick,
-            isFavoriteView = showFavoritesOnly,
-            onToggleFavoriteView = { 
-                showFavoritesOnly = !showFavoritesOnly 
-                // برای اینکه بعد از تغییر تب، لیست بره بالای صفحه
-                scope.launch { listState.scrollToItem(0) }
-            }
-        )
-
-        if (showSearchBar) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                placeholder = { Text("Search...", color = TextGray) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                singleLine = true,
-                trailingIcon = {
-                    if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { searchQuery = "" }) {
-                            Icon(Icons.Default.Close, contentDescription = "Clear", tint = TextWhite)
-                        }
-                    }
+    // استفاده از Box برای اینکه دکمه شناور روی لیست بیاد
+    Box(modifier = Modifier.fillMaxSize().background(DarkBackground)) {
+        
+        Column(modifier = Modifier.fillMaxSize()) {
+            HeaderBar(
+                feedCount = displayedFeeds.size,
+                onRefreshClick = { loadFeeds(true) },
+                onSearchClick = { 
+                    showSearchBar = !showSearchBar 
+                    if (!showSearchBar) searchQuery = ""
                 },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = NeonBlue,
-                    unfocusedBorderColor = TextGray,
-                    focusedTextColor = TextWhite,
-                    unfocusedTextColor = TextWhite
-                )
+                onSettingsClick = onSettingsClick,
+                isFavoriteView = showFavoritesOnly,
+                onToggleFavoriteView = { 
+                    showFavoritesOnly = !showFavoritesOnly 
+                    scope.launch { listState.scrollToItem(0) }
+                }
             )
-        }
 
-        if (isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = NeonBlue)
-            }
-        } else if (errorMsg != null) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = errorMsg!!, color = NeonRed)
-            }
-        } else {
-            if (displayedFeeds.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = if (showFavoritesOnly) "No favorite feeds found." else "No feeds found.",
-                        color = TextGray
+            if (showSearchBar) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = { Text("Search...", color = TextGray) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    singleLine = true,
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(Icons.Default.Close, contentDescription = "Clear", tint = TextWhite)
+                            }
+                        }
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = NeonBlue,
+                        unfocusedBorderColor = TextGray,
+                        focusedTextColor = TextWhite,
+                        unfocusedTextColor = TextWhite
                     )
+                )
+            }
+
+            if (isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = NeonBlue)
+                }
+            } else if (errorMsg != null) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = errorMsg!!, color = NeonRed)
                 }
             } else {
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 16.dp)
-                ) {
-                    itemsIndexed(displayedFeeds) { index, feed ->
-                        val uniqueId = "${feed.freq}_${feed.pol}_${feed.sr}_${feed.datetime}".replace(" ", "")
-                        FeedCard(
-                            feed = feed, 
-                            index = index,
-                            isFavorite = favoriteIds.contains(uniqueId),
-                            onFavoriteClick = {
-                                FavoritesManager.toggleFavorite(context, feed)
-                                favoriteIds = FavoritesManager.getFavorites(context)
-                            },
-                            onClick = { onFeedClick(feed) }
+                if (displayedFeeds.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = if (showFavoritesOnly) "No favorite feeds found." else "No feeds found.",
+                            color = TextGray
                         )
                     }
-                    
-                    item {
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Text(
-                            text = "Developed by @Shr776 | @VuSolo | @PomSat",
-                            color = TextGray,
-                            fontSize = 12.sp,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
-                        )
+                } else {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 80.dp) // فاصله برای اینکه دکمه شناور روی فید آخر نیفته
+                    ) {
+                        itemsIndexed(displayedFeeds) { index, feed ->
+                            val uniqueId = "${feed.freq}_${feed.pol}_${feed.sr}_${feed.datetime}".replace(" ", "")
+                            FeedCard(
+                                feed = feed, 
+                                index = index,
+                                isFavorite = favoriteIds.contains(uniqueId),
+                                onFavoriteClick = {
+                                    FavoritesManager.toggleFavorite(context, feed)
+                                    favoriteIds = FavoritesManager.getFavorites(context)
+                                },
+                                onClick = { onFeedClick(feed) }
+                            )
+                        }
+                        
+                        item {
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Text(
+                                text = "Developed by @Shr776 | @VuSolo | @PomSat",
+                                color = TextGray,
+                                fontSize = 12.sp,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
+            }
+        }
+
+        // دکمه شناور اسکرول به بالا
+        AnimatedVisibility(
+            visible = showScrollToTopButton,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            FloatingActionButton(
+                onClick = {
+                    scope.launch {
+                        listState.animateScrollToItem(0) // اسکرول نرم به اول لیست
+                    }
+                },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = TextWhite
+            ) {
+                Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Scroll to Top")
             }
         }
     }
