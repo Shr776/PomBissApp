@@ -31,32 +31,23 @@ import com.pombiss.app.ui.theme.*
 fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
     val context = LocalContext.current
 
-    // تشخیص هوشمند لوگو (لیگ + کشور + ورزش)
     val logoResId = when {
-        // ۱. لیگ‌های باشگاهی (با اسم لیگ یا کشور)
         feed.title.contains("UEFA", ignoreCase = true) && !feed.title.contains("Europa", ignoreCase = true) && !feed.title.contains("Nations", ignoreCase = true) -> R.drawable.logo_uefa
         feed.title.contains("Europa League", ignoreCase = true) -> R.drawable.logo_europaleague
         feed.title.contains("Nations League", ignoreCase = true) -> R.drawable.logo_uefa 
-        
         feed.title.contains("Premier League", ignoreCase = true) || feed.title.contains("England", ignoreCase = true) || feed.title.contains("English", ignoreCase = true) -> R.drawable.logo_premierleague
         feed.title.contains("La Liga", ignoreCase = true) || feed.title.contains("LaLiga", ignoreCase = true) || feed.title.contains("Spain", ignoreCase = true) || feed.title.contains("Spanish", ignoreCase = true) -> R.drawable.logo_laliga
         feed.title.contains("Serie A", ignoreCase = true) || feed.title.contains("Italy", ignoreCase = true) || feed.title.contains("Italian", ignoreCase = true) -> R.drawable.logo_seriea
         feed.title.contains("Bundesliga", ignoreCase = true) || feed.title.contains("German", ignoreCase = true) || feed.title.contains("Germany", ignoreCase = true) -> R.drawable.logo_bundesliga
         feed.title.contains("Ligue 1", ignoreCase = true) || feed.title.contains("France", ignoreCase = true) || feed.title.contains("French", ignoreCase = true) -> R.drawable.logo_ligue1
-        
-        // ۲. جام‌های ملی (با اسم جام یا کشور)
         feed.title.contains("World Cup", ignoreCase = true) || feed.title.contains("FIFA", ignoreCase = true) -> R.drawable.logo_worldcup
         feed.title.contains("Euro", ignoreCase = true) && !feed.title.contains("Europa", ignoreCase = true) -> R.drawable.logo_euro
         feed.title.contains("Copa", ignoreCase = true) || feed.title.contains("CONMEBOL", ignoreCase = true) || feed.title.contains("South America", ignoreCase = true) -> R.drawable.logo_copaamerica
-        
-        // ۳. لیگ‌های منطقه‌ای
         feed.title.contains("AFC", ignoreCase = true) || feed.title.contains("Asian", ignoreCase = true) || feed.title.contains("Asia", ignoreCase = true) -> R.drawable.logo_afc
         feed.title.contains("CAF", ignoreCase = true) || feed.title.contains("African", ignoreCase = true) || feed.title.contains("Africa", ignoreCase = true) -> R.drawable.logo_caf
         feed.title.contains("Saudi", ignoreCase = true) -> R.drawable.logo_saudileague
         feed.title.contains("Egypt", ignoreCase = true) -> R.drawable.logo_egyptleague
         feed.title.contains("Iran", ignoreCase = true) || feed.title.contains("Persian Gulf", ignoreCase = true) -> R.drawable.logo_iranleague
-
-        // ۴. ورزش‌های دیگر
         feed.title.contains("Tennis", ignoreCase = true) -> R.drawable.logo_tennis
         feed.title.contains("Basketball", ignoreCase = true) -> R.drawable.logo_basketball
         feed.title.contains("Handbal", ignoreCase = true) -> R.drawable.logo_handball
@@ -68,11 +59,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
         feed.title.contains("Boxing", ignoreCase = true) -> R.drawable.logo_boxing
         feed.title.contains("NFL", ignoreCase = true) -> R.drawable.logo_nfl
         feed.title.contains("UFC", ignoreCase = true) -> R.drawable.logo_ufc
-        
-        // ۵. فوتبال عمومی (اگه هیچی پیدا نشد)
         feed.title.contains("Football", ignoreCase = true) -> R.drawable.logo_football
-        
-        // ۶. حالت پیش‌فرض (اگه هیچی پیدا نشد، لوگوی PomBiss میاد)
         else -> R.drawable.pombiss_logo 
     }
 
@@ -97,7 +84,6 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
                 .padding(horizontal = 16.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // عنوان فید
             Text(
                 text = feed.title,
                 fontSize = 26.sp,
@@ -109,7 +95,6 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
             
             Spacer(modifier = Modifier.height(12.dp))
 
-            // نام ماهواره
             Text(
                 text = feed.sat,
                 fontSize = 24.sp,
@@ -121,7 +106,6 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
             
             Spacer(modifier = Modifier.height(24.dp))
 
-            // مشخصات فرکانس
             Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
                 Text(text = feed.freq, fontSize = 34.sp, fontWeight = FontWeight.Black, color = NeonYellow)
                 Spacer(modifier = Modifier.width(10.dp))
@@ -136,7 +120,6 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // اسم فید
             Text(
                 text = if (feed.feedId.isNotBlank()) feed.feedId else "No Feed ID",
                 fontSize = 20.sp,
@@ -147,7 +130,6 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // فرمت
             Text(
                 text = feed.type,
                 fontSize = 18.sp,
@@ -157,7 +139,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // کد فید و دکمه کپی
+            // کپی کامل مشخصات (نه فقط کد)
             Card(
                 colors = CardDefaults.cardColors(containerColor = SurfaceDark),
                 shape = RoundedCornerShape(8.dp),
@@ -176,23 +158,22 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
                     Spacer(modifier = Modifier.width(12.dp))
                     IconButton(
                         onClick = {
+                            // حالا کل اطلاعات کپی میشه (هماهنگ با صفحه لیست)
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            val clip = ClipData.newPlainText("CW", feed.cw)
+                            val clip = ClipData.newPlainText("Feed Info", feed.toShareString())
                             clipboard.setPrimaryClip(clip)
-                            Toast.makeText(context, "کد کپی شد!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "کل اطلاعات کپی شد!", Toast.LENGTH_SHORT).show()
                         }
                     ) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy CW", tint = MaterialTheme.colorScheme.primary)
+                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy All", tint = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // تاریخ
             Text(text = feed.datetime, fontSize = 16.sp, color = TextGray)
 
-            // نمایش اطلاعات اضافی (Event)
             if (feed.event.isNotBlank()) {
                 Spacer(modifier = Modifier.height(24.dp))
                 Card(
@@ -224,17 +205,16 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // لوگو (همیشه نمایش داده میشه، حتی اگه لوگوی ورزش نباشه، لوگوی پوم‌بیس میاد)
+            // لوگوی بزرگ‌تر (از 100 به 140)
             Image(
                 painter = painterResource(id = logoResId),
                 contentDescription = "Logo",
-                modifier = Modifier.size(100.dp), 
+                modifier = Modifier.size(140.dp), 
                 contentScale = ContentScale.Fit
             )
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // فوتر تبلیغاتی
             HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), thickness = 1.dp)
             Spacer(modifier = Modifier.height(16.dp))
             
