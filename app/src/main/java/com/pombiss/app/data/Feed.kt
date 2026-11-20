@@ -15,7 +15,7 @@ data class Feed(
     val datetime: String
 ) {
     fun toShareString(): String {
-        // لینک کانال اصلی اینجاست
+        // لینک کانال فید به آخر متن اضافه شد
         return "Sat: $sat\nFreq: $freq $pol $sr\nFeed: ${if(feedId.isNotBlank()) feedId else title}\nType: $type\nCW: $cw\nTime: $datetime\n\n📡 Join: https://t.me/PomFeed"
     }
 }
