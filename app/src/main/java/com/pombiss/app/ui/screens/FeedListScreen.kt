@@ -38,10 +38,9 @@ fun FeedListScreen(
     var showSearchBar by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     
-    // وضعیت نمایش تب: false یعنی همه فیدها، true یعنی فقط فیدهای مورد علاقه
     var showFavoritesOnly by remember { mutableStateOf(false) }
     
-    // لیست آیدی فیدهای مورد علاقه (برای اینکه با کلیک روی ستاره، UI آپدیت بشه)
+    // استفاده از getFavorites برای ذخیره آیدی‌های یکتا
     var favoriteIds by remember { mutableStateOf(FavoritesManager.getFavorites(context)) }
 
     val listState = rememberLazyListState()
@@ -55,12 +54,11 @@ fun FeedListScreen(
                 val newFeeds = repository.getFeeds(forceRefresh = force)
                 feeds = newFeeds
                 
-                // حالا که لیست جدید اومد، اونایی که دیگه توی لیست نیستن رو از فیووریت حذف کنیم
-                val currentFeedIds = newFeeds.map { it.position }.toSet()
+                // حذف فیدهایی که دیگه توی لیست نیستن از فیووریت
+                val currentFeedIds = newFeeds.map { "${it.freq}_${it.pol}_${it.sr}_${it.datetime}".replace(" ", "") }.toSet()
                 val currentFavorites = FavoritesManager.getFavorites(context).toMutableSet()
                 currentFavorites.retainAll(currentFeedIds)
                 
-                // آپدیت حافظه
                 context.getSharedPreferences("PomBissFavorites", android.content.Context.MODE_PRIVATE)
                     .edit().putStringSet("favorite_feeds", currentFavorites).apply()
                 
@@ -78,7 +76,6 @@ fun FeedListScreen(
         loadFeeds(false)
     }
 
-    // فیلتر کردن بر اساس جستجو
     val searchedFeeds = if (searchQuery.isBlank()) {
         feeds
     } else {
@@ -90,9 +87,12 @@ fun FeedListScreen(
         }
     }
 
-    // فیلتر کردن بر اساس فیووریت
+    // فیلتر کردن برای فیووریت
     val displayedFeeds = if (showFavoritesOnly) {
-        searchedFeeds.filter { favoriteIds.contains(it.position) }
+        searchedFeeds.filter { feed ->
+            val uniqueId = "${feed.freq}_${feed.pol}_${feed.sr}_${feed.datetime}".replace(" ", "")
+            favoriteIds.contains(uniqueId)
+        }
     } else {
         searchedFeeds
     }
@@ -110,16 +110,19 @@ fun FeedListScreen(
                 if (!showSearchBar) searchQuery = ""
             },
             onSettingsClick = onSettingsClick,
-            // ارسال وضعیت فیووریت به هدر (برای دکمه جدید)
             isFavoriteView = showFavoritesOnly,
-            onToggleFavoriteView = { showFavoritesOnly = !showFavoritesOnly }
+            onToggleFavoriteView = { 
+                showFavoritesOnly = !showFavoritesOnly 
+                // برای اینکه بعد از تغییر تب، لیست بره بالای صفحه
+                scope.launch { listState.scrollToItem(0) }
+            }
         )
 
         if (showSearchBar) {
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Search by name, satellite, or freq...", color = TextGray) },
+                placeholder = { Text("Search...", color = TextGray) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -163,13 +166,13 @@ fun FeedListScreen(
                     contentPadding = PaddingValues(bottom = 16.dp)
                 ) {
                     itemsIndexed(displayedFeeds) { index, feed ->
+                        val uniqueId = "${feed.freq}_${feed.pol}_${feed.sr}_${feed.datetime}".replace(" ", "")
                         FeedCard(
                             feed = feed, 
                             index = index,
-                            isFavorite = favoriteIds.contains(feed.position),
+                            isFavorite = favoriteIds.contains(uniqueId),
                             onFavoriteClick = {
-                                // با کلیک روی ستاره، وضعیتش رو تغییر بده
-                                val isNowFav = FavoritesManager.toggleFavorite(context, feed.position)
+                                FavoritesManager.toggleFavorite(context, feed)
                                 favoriteIds = FavoritesManager.getFavorites(context)
                             },
                             onClick = { onFeedClick(feed) }
