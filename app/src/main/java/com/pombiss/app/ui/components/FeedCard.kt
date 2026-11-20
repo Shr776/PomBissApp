@@ -49,11 +49,9 @@ fun FeedCard(
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // بخش سمت چپ (اطلاعات)
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                // ردیف شماره و عنوان
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "${index + 1}.",
@@ -62,7 +60,6 @@ fun FeedCard(
                         color = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    
                     Text(
                         text = feed.title,
                         fontSize = 15.sp,
@@ -73,7 +70,6 @@ fun FeedCard(
                 
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // فرکانس، SR و پلاریزاسیون
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(text = feed.freq, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = NeonYellow)
                     Spacer(modifier = Modifier.width(8.dp))
@@ -88,7 +84,6 @@ fun FeedCard(
                 
                 Spacer(modifier = Modifier.height(6.dp))
                 
-                // اسم فید
                 Text(
                     text = if (feed.feedId.isNotBlank()) feed.feedId else "No Feed ID",
                     fontSize = 14.sp,
@@ -98,7 +93,6 @@ fun FeedCard(
                 
                 Spacer(modifier = Modifier.height(8.dp))
                 
-                // ردیف کد فید و دکمه کپی
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(text = feed.cw, fontSize = 13.sp, color = NeonOrange, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.width(6.dp))
@@ -107,7 +101,7 @@ fun FeedCard(
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                             val clip = ClipData.newPlainText("Feed Info", feed.toShareString())
                             clipboard.setPrimaryClip(clip)
-                            Toast.makeText(context, "اطلاعات کپی شد!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "کل اطلاعات کپی شد!", Toast.LENGTH_SHORT).show()
                         },
                         modifier = Modifier.size(24.dp)
                     ) {
@@ -117,7 +111,6 @@ fun FeedCard(
                 
                 Spacer(modifier = Modifier.height(6.dp))
                 
-                // تاریخ و فرمت
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -128,7 +121,6 @@ fun FeedCard(
                 }
             }
 
-            // خط عمودی جداکننده
             VerticalDivider(
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
@@ -137,12 +129,10 @@ fun FeedCard(
                 thickness = 1.dp
             )
 
-            // بخش راست: ماهواره + ستاره
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.width(70.dp)
             ) {
-                // ماهواره
                 Text(
                     text = feed.sat,
                     fontSize = 24.sp,
@@ -154,7 +144,6 @@ fun FeedCard(
                 
                 Spacer(modifier = Modifier.height(4.dp))
                 
-                // دکمه ستاره
                 IconButton(
                     onClick = onFavoriteClick,
                     modifier = Modifier.size(32.dp)
@@ -163,7 +152,7 @@ fun FeedCard(
                         Icon(
                             imageVector = Icons.Filled.Star,
                             contentDescription = "Remove Favorite",
-                            tint = Color(0xFFFFD700) // رنگ طلایی
+                            tint = Color(0xFFFFD700)
                         )
                     } else {
                         Icon(
