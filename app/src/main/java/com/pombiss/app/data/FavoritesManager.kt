@@ -7,23 +7,27 @@ object FavoritesManager {
     private const val PREFS_NAME = "PomBissFavorites"
     private const val KEY_FAVORITES = "favorite_feeds"
 
-    // گرفتن لیست فیدهای ذخیره شده
+    // ساخت یه آیدی یکتا از ترکیب اطلاعات فید
+    private fun getUniqueId(feed: Feed): String {
+        return "${feed.freq}_${feed.pol}_${feed.sr}_${feed.datetime}".replace(" ", "")
+    }
+
     fun getFavorites(context: Context): Set<String> {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         return prefs.getStringSet(KEY_FAVORITES, emptySet()) ?: emptySet()
     }
 
-    // اضافه یا حذف کردن یه فید از لیست
-    fun toggleFavorite(context: Context, feedId: String): Boolean {
+    fun toggleFavorite(context: Context, feed: Feed): Boolean {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val currentFavorites = getFavorites(context).toMutableSet()
+        val uniqueId = getUniqueId(feed)
         
         val isNowFavorite: Boolean
-        if (currentFavorites.contains(feedId)) {
-            currentFavorites.remove(feedId)
+        if (currentFavorites.contains(uniqueId)) {
+            currentFavorites.remove(uniqueId)
             isNowFavorite = false
         } else {
-            currentFavorites.add(feedId)
+            currentFavorites.add(uniqueId)
             isNowFavorite = true
         }
         
@@ -31,8 +35,7 @@ object FavoritesManager {
         return isNowFavorite
     }
 
-    // چک کردن اینکه یه فید جزو علاقه‌مندی‌هاست یا نه
-    fun isFavorite(context: Context, feedId: String): Boolean {
-        return getFavorites(context).contains(feedId)
+    fun isFavorite(context: Context, feed: Feed): Boolean {
+        return getFavorites(context).contains(getUniqueId(feed))
     }
 }
