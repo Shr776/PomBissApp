@@ -3,7 +3,8 @@ package com.pombiss.app.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed // تغییر به itemsIndexed برای گرفتن شماره
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState // اضافه شد
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
@@ -33,6 +34,9 @@ fun FeedListScreen(
     
     var showSearchBar by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
+
+    // این خط موقعیت اسکرول رو ذخیره می‌کنه
+    val listState = rememberLazyListState()
 
     val scope = rememberCoroutineScope()
 
@@ -120,14 +124,14 @@ fun FeedListScreen(
                 }
             } else {
                 LazyColumn(
+                    state = listState, // وصل کردن استیت به لیست
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = 16.dp)
                 ) {
-                    // استفاده از itemsIndexed برای گرفتن شماره ایندکس
                     itemsIndexed(filteredFeeds) { index, feed ->
                         FeedCard(
                             feed = feed, 
-                            index = index, // ارسال ایندکس
+                            index = index, 
                             onClick = { onFeedClick(feed) }
                         )
                     }
