@@ -11,10 +11,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -24,7 +27,13 @@ import com.pombiss.app.data.Feed
 import com.pombiss.app.ui.theme.*
 
 @Composable
-fun FeedCard(feed: Feed, index: Int, onClick: () -> Unit) { // پارامتر index اضافه شد
+fun FeedCard(
+    feed: Feed, 
+    index: Int, 
+    isFavorite: Boolean,
+    onFavoriteClick: () -> Unit,
+    onClick: () -> Unit
+) {
     val context = LocalContext.current
 
     Card(
@@ -46,16 +55,14 @@ fun FeedCard(feed: Feed, index: Int, onClick: () -> Unit) { // پارامتر in
             ) {
                 // ردیف شماره و عنوان
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // شماره لیست (از ۱ شروع میشه)
                     Text(
-                        text = "${index + 1}.", // شماره لیست
+                        text = "${index + 1}.",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     
-                    // عنوان فید
                     Text(
                         text = feed.title,
                         fontSize = 15.sp,
@@ -130,21 +137,42 @@ fun FeedCard(feed: Feed, index: Int, onClick: () -> Unit) { // پارامتر in
                 thickness = 1.dp
             )
 
-            // ماهواره
-            Box(
-                modifier = Modifier
-                    .width(70.dp)
-                    .padding(vertical = 4.dp),
-                contentAlignment = Alignment.Center
+            // بخش راست: ماهواره + ستاره
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.width(70.dp)
             ) {
+                // ماهواره
                 Text(
                     text = feed.sat,
-                    fontSize = 28.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Black,
                     color = MaterialTheme.colorScheme.primary,
                     textAlign = TextAlign.Center,
-                    lineHeight = 30.sp
+                    lineHeight = 26.sp
                 )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                // دکمه ستاره
+                IconButton(
+                    onClick = onFavoriteClick,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    if (isFavorite) {
+                        Icon(
+                            imageVector = Icons.Filled.Star,
+                            contentDescription = "Remove Favorite",
+                            tint = Color(0xFFFFD700) // رنگ طلایی
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Outlined.StarBorder,
+                            contentDescription = "Add Favorite",
+                            tint = TextGray
+                        )
+                    }
+                }
             }
         }
     }
