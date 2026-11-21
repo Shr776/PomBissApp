@@ -9,56 +9,50 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.UUID
-import java.io.File
 
 object LicenseManager {
 
     private const val SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlckeyeshqWrLzjUTderETd2iDMfN77ca1LeXXsFz9JI5ZijPiT0o9FiruyBhXb2o/exec"
+    private const val PREFS_NAME = "PomBissPrefs"
+    private const val KEY_DEVICE_UUID = "device_uuid"
 
+    // حالا کد یکتا رو توی SharedPreferences ذخیره می‌کنیم (امن و پایدار)
     fun getDeviceId(context: Context): String {
         val brand = android.os.Build.BRAND ?: "Unknown"
         val model = android.os.Build.MODEL ?: "Unknown"
         
-        val uuidFile = File(context.filesDir, "pombiss_device_uuid.txt")
-        var uniqueId = ""
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        var uniqueId = prefs.getString(KEY_DEVICE_UUID, null)
 
-        if (uuidFile.exists()) {
-            uniqueId = uuidFile.readText()
-        } else {
+        if (uniqueId == null) {
+            // اگه اولین باره، یه کد تصادفی می‌سازیم و توی SharedPreferences ذخیره می‌کنیم
             uniqueId = UUID.randomUUID().toString().take(8).uppercase()
-            uuidFile.writeText(uniqueId)
+            prefs.edit().putString(KEY_DEVICE_UUID, uniqueId).apply()
         }
 
         return "$brand-$model-$uniqueId".replace(" ", "").uppercase()
     }
 
-    fun getDeviceModel(): String {
-        return android.os.Build.MODEL ?: "Unknown"
-    }
+    fun getDeviceModel(): String = android.os.Build.MODEL ?: "Unknown"
+    fun getDeviceBrand(): String = android.os.Build.BRAND ?: "Unknown"
 
-    fun getDeviceBrand(): String {
-        return android.os.Build.BRAND ?: "Unknown"
-    }
-
-    // ذخیره و خواندن یوزرنیم
     fun saveUsername(context: Context, username: String) {
-        val prefs = context.getSharedPreferences("PomBissPrefs", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit().putString("username", username).apply()
     }
 
     fun getUsername(context: Context): String {
-        val prefs = context.getSharedPreferences("PomBissPrefs", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         return prefs.getString("username", "User") ?: "User"
     }
 
-    // ذخیره و خواندن کد کشور (مثلا IR, US, TR)
     fun saveCountryCode(context: Context, countryCode: String) {
-        val prefs = context.getSharedPreferences("PomBissPrefs", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit().putString("country_code", countryCode).apply()
     }
 
     fun getCountryCode(context: Context): String {
-        val prefs = context.getSharedPreferences("PomBissPrefs", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         return prefs.getString("country_code", "IR") ?: "IR"
     }
 
@@ -208,12 +202,12 @@ object LicenseManager {
     }
 
     fun saveActivation(context: Context, isActivated: Boolean) {
-        val prefs = context.getSharedPreferences("PomBissPrefs", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit().putBoolean("is_activated", isActivated).apply()
     }
 
     fun isActivated(context: Context): Boolean {
-        val prefs = context.getSharedPreferences("PomBissPrefs", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         return prefs.getBoolean("is_activated", false)
     }
 }
