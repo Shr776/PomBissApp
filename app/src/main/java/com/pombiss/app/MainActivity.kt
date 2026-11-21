@@ -16,6 +16,7 @@ import com.pombiss.app.data.FeedRepository
 import com.pombiss.app.data.LicenseManager
 import com.pombiss.app.ui.screens.*
 import com.pombiss.app.ui.theme.*
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,12 +25,24 @@ class MainActivity : ComponentActivity() {
             val context = LocalContext.current
             
             var currentTheme by remember { mutableStateOf(ThemeManager.getSelectedTheme(context)) }
+            
+            // وضعیت‌های باز شدن صفحات
             var showSettings by remember { mutableStateOf(false) }
+            var showProfileEdit by remember { mutableStateOf(false) }
 
             PomBissTheme(
                 primaryColor = currentTheme.primary,
                 accentColor = currentTheme.accent
             ) {
+                // اگر صفحه ویرایش پروفایل باز بود
+                if (showProfileEdit) {
+                    ProfileEditScreen(
+                        onBack = { showProfileEdit = false }
+                    )
+                    return@PomBissTheme
+                }
+
+                // اگر صفحه تنظیمات باز بود
                 if (showSettings) {
                     SettingsScreen(
                         currentThemeId = currentTheme.id,
@@ -37,25 +50,28 @@ class MainActivity : ComponentActivity() {
                             ThemeManager.saveTheme(context, themeId)
                             currentTheme = ThemeManager.getSelectedTheme(context)
                         },
+                        onEditProfileClick = { 
+                            showSettings = false
+                            showProfileEdit = true 
+                        },
                         onBack = { showSettings = false }
                     )
                     return@PomBissTheme
                 }
 
-                // وضعیت‌ها: 3=لودینگ، 0=لاگین/ثبت‌نام، 1=پندینگ، 2=برنامه اصلی
                 var appState by remember { mutableStateOf(3) }
                 var selectedFeed by remember { mutableStateOf<Feed?>(null) }
                 val repository = remember { FeedRepository(applicationContext) }
-                
-                // آیا کاربر از قبل لاگین کرده؟ (برای اینکه هر بار صفحه لاگین نیاد)
-                var isLoggedIn by remember { mutableStateOf(LicenseManager.isActivated(context)) }
 
                 LaunchedEffect(Unit) {
                     if (LicenseManager.isActivated(context)) {
-                        // اگه قبلاً لاگین کرده بود، برو تو
-                        appState = 2
+                        val isStillActive = LicenseManager.checkUserStatus(context)
+                        if (isStillActive) {
+                            appState = 2
+                        } else {
+                            appState = 1
+                        }
                     } else {
-                        // اگه نکرده بود، برو صفحه لاگین
                         appState = 0
                     }
                 }
@@ -70,33 +86,24 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     0 -> {
-                        // صفحه لاگین و ثبت‌نام
-                        if (isLoggedIn) {
-                            appState = 2 // (دوباره چک میکنیم)
-                        } else {
-                            LoginScreen(
-                                onLoginSuccess = {
-                                    LicenseManager.saveActivation(applicationContext, true)
-                                    isLoggedIn = true
-                                    appState = 2
-                                },
-                                onGoToRegister = {
-                                    // وقتی روی دکمه ثبت‌نام کلیک کرد، میره به فرم ثبت‌نام
-                                    appState = 4 
-                                }
-                            )
-                        }
+                        LoginScreen(
+                            onLoginSuccess = {
+                                LicenseManager.saveActivation(applicationContext, true)
+                                appState = 2
+                            },
+                            onGoToRegister = {
+                                appState = 4 
+                            }
+                        )
                     }
                     4 -> {
-                        // صفحه ثبت‌نام
                         RegistrationScreen(
                             onRegistrationSuccess = {
-                                appState = 1 // برو به پندینگ
+                                appState = 1 
                             }
                         )
                     }
                     1 -> {
-                        // صفحه انتظار
                         PendingScreen(
                             onApproved = {
                                 LicenseManager.saveActivation(applicationContext, true)
@@ -105,7 +112,6 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     2 -> {
-                        // برنامه اصلی
                         if (selectedFeed == null) {
                             FeedListScreen(
                                 repository = repository,
