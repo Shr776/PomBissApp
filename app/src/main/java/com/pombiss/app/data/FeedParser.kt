@@ -18,35 +18,38 @@ object FeedParser {
 
         val cw = parts.getOrNull(1) ?: ""
         
+        // --- ۱. کوتاه کردن عنوان (مثل خط اول کانال تلگرام) ---
         var rawTitle = parts.getOrNull(2) ?: ""
         
-        if (rawTitle.startsWith("#")) rawTitle = rawTitle.substring(1).trim()
+        // اگه علامت @ یا پرانتز داشت، از همون جا به بعد رو کات کن
         if (rawTitle.contains("@")) rawTitle = rawTitle.substringBefore("@").trim()
         if (rawTitle.contains("(")) rawTitle = rawTitle.substringBefore("(").trim()
         
-        // لیست کلمات کلیدی رو کامل‌تر کردم و به حالت‌های مختلف (Handbal, Vollyball و...) حساس نیست
-        val sportKeywords = listOf(
-            "Football", "Tennis", "Basketball", "Handbal", "Vollyball", "Volleyball", 
-            "Water Sport", "Motorsport", "Boxing", "Cricket", "Rugby", "NFL", "UFC", "Darts",
-            "Figure Skating", "UEFA Champions League", "UEFA", "NHL", "MotoGP", "Formula"
-        )
-        
-        var foundKeyword = false
-        for (keyword in sportKeywords) {
-            if (rawTitle.contains(keyword, ignoreCase = true)) {
-                val index = rawTitle.indexOf(keyword, ignoreCase = true)
-                rawTitle = rawTitle.substring(0, index + keyword.length).trim()
-                foundKeyword = true
-                break 
-            }
+        // اگه کلمه Feed یا Feeds توش بود، از همون جا کات کن
+        val lowerTitle = rawTitle.lowercase()
+        if (lowerTitle.contains("feed")) {
+            val index = lowerTitle.indexOf("feed")
+            rawTitle = rawTitle.substring(0, index).trim()
         }
         
-        if (!foundKeyword && rawTitle.length > 25) {
-            rawTitle = rawTitle.take(25) + "..."
-        }
+        // حذف هشتگ از اول
+        if (rawTitle.startsWith("#")) rawTitle = rawTitle.substring(1).trim()
+        
+        // محدود کردن به ۲۵ کاراکتر
+        if (rawTitle.length > 25) rawTitle = rawTitle.take(25) + "..."
         
         val title = if (rawTitle.isBlank()) "Live Feed" else rawTitle
 
+        // --- ۲. استخراج اسم تیم‌ها از بخش Event ---
+        val fullEvent = parts.getOrNull(6) ?: ""
+        // اگه توی ایونت خط تیره (-) بود، بخش بعد از اون (اسم تیم‌ها) رو بردار
+        val eventTeams = if (fullEvent.contains("-")) {
+            fullEvent.substringAfter("-").trim()
+        } else {
+            fullEvent
+        }
+
+        // --- ۳. کوتاه کردن اسم ماهواره ---
         var sat = parts.getOrNull(3) ?: ""
         if (sat.contains("(")) {
             sat = sat.substringAfter("(").substringBefore(")").trim()
@@ -57,7 +60,6 @@ object FeedParser {
 
         val type = parts.getOrNull(4) ?: ""
         val feedId = parts.getOrNull(5) ?: ""
-        val event = parts.getOrNull(6) ?: ""
         val datetime = parts.lastOrNull { it.contains("-") && it.contains(":") } ?: ""
 
         return Feed(
@@ -70,7 +72,7 @@ object FeedParser {
             sat = sat,
             type = type,
             feedId = feedId,
-            event = event,
+            event = eventTeams, // حالا این فقط اسم تیم‌هاست
             category = "",
             datetime = datetime
         )
