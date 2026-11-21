@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,12 +25,13 @@ import com.pombiss.app.ui.theme.*
 fun SettingsScreen(
     currentThemeId: String,
     onThemeSelected: (String) -> Unit,
+    onEditProfileClick: () -> Unit,
     onBack: () -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings & Themes", color = TextWhite) },
+                title = { Text("Settings", color = TextWhite) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = TextWhite)
@@ -47,6 +49,28 @@ fun SettingsScreen(
                 .padding(horizontal = 16.dp),
             contentPadding = PaddingValues(vertical = 16.dp)
         ) {
+            // گزینه ویرایش پروفایل
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 6.dp)
+                        .clickable { onEditProfileClick() },
+                    colors = CardDefaults.cardColors(containerColor = SurfaceDark),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Default.Person, contentDescription = "Profile", tint = MaterialTheme.colorScheme.primary)
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text("Edit Profile (Name, Password)", fontSize = 16.sp, color = TextWhite)
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
             item {
                 Text(
                     text = "Select Theme Color",
@@ -72,14 +96,11 @@ fun SettingsScreen(
                     } else null
                 ) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            // دایره رنگی تم
                             Box(
                                 modifier = Modifier
                                     .size(32.dp)
@@ -94,7 +115,6 @@ fun SettingsScreen(
                             )
                         }
                         
-                        // تیک برای تم فعال
                         if (theme.id == currentThemeId) {
                             Icon(
                                 imageVector = Icons.Default.Check,
