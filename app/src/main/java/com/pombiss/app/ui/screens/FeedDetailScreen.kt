@@ -3,20 +3,28 @@ package com.pombiss.app.ui.screens
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -24,13 +32,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pombiss.app.R
 import com.pombiss.app.data.Feed
+import com.pombiss.app.data.LicenseManager
 import com.pombiss.app.ui.theme.*
+import androidx.core.view.drawToBitmap
+import java.io.File
+import java.io.FileOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
     val context = LocalContext.current
+    val view = LocalView.current
+    val username = LicenseManager.getUsername(context)
+    val isAdmin = username == "Shr776" // فقط ادمین می‌تونه متن بفرسته
 
+    // تشخیص هوشمند لوگو
     val logoResId = when {
         feed.title.contains("UEFA", ignoreCase = true) && !feed.title.contains("Europa", ignoreCase = true) && !feed.title.contains("Nations", ignoreCase = true) -> R.drawable.logo_uefa
         feed.title.contains("Europa League", ignoreCase = true) -> R.drawable.logo_europaleague
@@ -70,6 +86,44 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = TextWhite)
+                    }
+                },
+                actions = {
+                    // دکمه اشتراک‌گذاری
+                    IconButton(onClick = {
+                        // گرفتن اسکرین‌شات از کل صفحه
+                        val bitmap = view.drawToBitmap()
+                        val file = File(context.cacheDir, "feed_share.png")
+                        val outputStream = FileOutputStream(file)
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                        outputStream.close()
+
+                        val uri = androidx.core.content.FileProvider.getUriForFile(
+                            context, 
+                            context.packageName + ".provider", 
+                            file
+                        )
+
+                        // نمایش منوی انتخاب (متن یا عکس)
+                        if (isAdmin) {
+                            // اگر ادمین بود، منو باز بشه
+                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                type = "image/png"
+                                putExtra(Intent.EXTRA_STREAM, uri)
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            context.startActivity(Intent.createChooser(shareIntent, "Share Image"))
+                        } else {
+                            // اگر کاربر عادی بود، فقط عکس بفرسته
+                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                type = "image/png"
+                                putExtra(Intent.EXTRA_STREAM, uri)
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            context.startActivity(Intent.createChooser(shareIntent, "Share Image"))
+                        }
+                    }) {
+                        Icon(Icons.Default.Share, contentDescription = "Share", tint = TextWhite)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkBackground)
@@ -139,7 +193,6 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // کپی کامل مشخصات (نه فقط کد)
             Card(
                 colors = CardDefaults.cardColors(containerColor = SurfaceDark),
                 shape = RoundedCornerShape(8.dp),
@@ -158,14 +211,13 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
                     Spacer(modifier = Modifier.width(12.dp))
                     IconButton(
                         onClick = {
-                            // حالا کل اطلاعات کپی میشه (هماهنگ با صفحه لیست)
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                             val clip = ClipData.newPlainText("Feed Info", feed.toShareString())
                             clipboard.setPrimaryClip(clip)
                             Toast.makeText(context, "کل اطلاعات کپی شد!", Toast.LENGTH_SHORT).show()
                         }
                     ) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy All", tint = MaterialTheme.colorScheme.primary)
+                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy", tint = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
@@ -205,7 +257,6 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // لوگوی بزرگ‌تر (از 100 به 140)
             Image(
                 painter = painterResource(id = logoResId),
                 contentDescription = "Logo",
