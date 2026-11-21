@@ -10,6 +10,7 @@
         android:label="PomBiss"
         android:supportsRtl="true"
         android:theme="@style/Theme.PomBiss">
+        
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -19,6 +20,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- این بخش برای اشتراک‌گذاری فایل (اسکرین‌شات) اضافه شد -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
     </application>
 
 </manifest>
