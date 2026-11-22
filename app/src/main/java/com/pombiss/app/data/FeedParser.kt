@@ -1,6 +1,14 @@
 package com.pombiss.app.data
 
+import java.util.regex.Pattern
+
 object FeedParser {
+
+    private val TEAMS_RE = Pattern.compile("\\s+(?:vs\\.?|v)\\s+", Pattern.CASE_INSENSITIVE)
+    private val DATE_RE = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}")
+
+    // فیلدهایی که ممکنه اسم تیم‌ها توشون باشه
+    private val EVENT_FIELDS = intArrayOf(6, 7)
 
     fun parseLine(line: String): Feed? {
         if (line.isBlank()) return null
@@ -58,12 +66,7 @@ object FeedParser {
         val feedId = parts.getOrNull(5) ?: ""
         
         // --- منطق جدید برای پیدا کردن اسم تیم‌ها ---
-        val rawEvent = parts.getOrNull(6) ?: ""
-        val event = if (rawEvent.contains("vs", ignoreCase = true) || rawEvent.contains(" - ")) {
-            rawEvent // اگه اسم تیم‌ها بود، همون رو بذار
-        } else {
-            "" // اگه فقط اسم لیگ بود، خالی بذار تا Match Info نمایش داده نشه
-        }
+        val event = pickEvent(parts)
         // -------------------------------------------
 
         val datetime = parts.lastOrNull { it.contains("-") && it.contains(":") } ?: ""
@@ -78,9 +81,28 @@ object FeedParser {
             sat = sat,
             type = type,
             feedId = feedId,
-            event = event, // اینجا از event اصلاح شده استفاده میکنیم
+            event = event,
             category = "",
             datetime = datetime
         )
+    }
+
+    private fun pickEvent(parts: List<String>): String {
+        val candidates = mutableListOf<String>()
+        for (idx in EVENT_FIELDS) {
+            if (idx < parts.size) {
+                val v = parts[idx].trim()
+                if (v.length >= 3 && !v.all { it.isDigit() } && !DATE_RE.matcher(v).find() && !v.contains("4:2")) {
+                    candidates.add(v)
+                }
+            }
+        }
+        // اولویت به فیلدی که اسم دو تیم رو داره
+        for (v in candidates) {
+            if (TEAMS_RE.matcher(v).find()) {
+                return v
+            }
+        }
+        return candidates.maxByOrNull { it.length } ?: ""
     }
 }
