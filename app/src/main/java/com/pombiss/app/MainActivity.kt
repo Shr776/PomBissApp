@@ -81,7 +81,6 @@ class MainActivity : ComponentActivity() {
                                     currentIndex = index
                                 },
                                 onSettingsClick = { showSettings = true }
-                                // onEditProfileClick حذف شد
                             )
                         }
                     }
