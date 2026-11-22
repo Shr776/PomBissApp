@@ -80,7 +80,8 @@ class MainActivity : ComponentActivity() {
                                     selectedFeedList = fullList
                                     currentIndex = index
                                 },
-                                onSettingsClick = { showSettings = true }
+                                onSettingsClick = { showSettings = true },
+                                onEditProfileClick = { /* فعلا کاری نکن */ } // این خط اضافه شد
                             )
                         }
                     }
