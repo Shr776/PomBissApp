@@ -80,8 +80,8 @@ class MainActivity : ComponentActivity() {
                                     selectedFeedList = fullList
                                     currentIndex = index
                                 },
-                                onSettingsClick = { showSettings = true },
-                                onEditProfileClick = { /* فعلا کاری نکن */ } // این خط اضافه شد
+                                onSettingsClick = { showSettings = true }
+                                // onEditProfileClick حذف شد
                             )
                         }
                     }
@@ -101,7 +101,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 
-                // مدیریت وضعیت برای رفتن به صفحه جزئیات
                 LaunchedEffect(currentIndex) {
                     if (currentIndex != -1) {
                         appState = 5
