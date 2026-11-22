@@ -4,12 +4,9 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -17,14 +14,11 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -32,21 +26,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pombiss.app.R
 import com.pombiss.app.data.Feed
-import com.pombiss.app.data.LicenseManager
 import com.pombiss.app.ui.theme.*
-import androidx.core.view.drawToBitmap
-import java.io.File
-import java.io.FileOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
+fun FeedDetailScreen(
+    feed: Feed, 
+    onBack: () -> Unit,
+    onNext: (() -> Unit)? = null,
+    onPrev: (() -> Unit)? = null
+) {
     val context = LocalContext.current
-    val view = LocalView.current
-    val username = LicenseManager.getUsername(context)
-    val isAdmin = username == "Shr776" // فقط ادمین می‌تونه متن بفرسته
 
-    // تشخیص هوشمند لوگو
     val logoResId = when {
         feed.title.contains("UEFA", ignoreCase = true) && !feed.title.contains("Europa", ignoreCase = true) && !feed.title.contains("Nations", ignoreCase = true) -> R.drawable.logo_uefa
         feed.title.contains("Europa League", ignoreCase = true) -> R.drawable.logo_europaleague
@@ -89,40 +80,16 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
                     }
                 },
                 actions = {
-                    // دکمه اشتراک‌گذاری
-                    IconButton(onClick = {
-                        // گرفتن اسکرین‌شات از کل صفحه
-                        val bitmap = view.drawToBitmap()
-                        val file = File(context.cacheDir, "feed_share.png")
-                        val outputStream = FileOutputStream(file)
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-                        outputStream.close()
-
-                        val uri = androidx.core.content.FileProvider.getUriForFile(
-                            context, 
-                            context.packageName + ".provider", 
-                            file
-                        )
-
-                        // نمایش منوی انتخاب (متن یا عکس)
-                        if (isAdmin) {
-                            // اگر ادمین بود، منو باز بشه
-                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                type = "image/png"
-                                putExtra(Intent.EXTRA_STREAM, uri)
-                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    IconButton(
+                        onClick = {
+                            val shareIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, feed.toShareString())
+                                type = "text/plain"
                             }
-                            context.startActivity(Intent.createChooser(shareIntent, "Share Image"))
-                        } else {
-                            // اگر کاربر عادی بود، فقط عکس بفرسته
-                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                type = "image/png"
-                                putExtra(Intent.EXTRA_STREAM, uri)
-                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                            }
-                            context.startActivity(Intent.createChooser(shareIntent, "Share Image"))
+                            context.startActivity(Intent.createChooser(shareIntent, "Share Feed via..."))
                         }
-                    }) {
+                    ) {
                         Icon(Icons.Default.Share, contentDescription = "Share", tint = TextWhite)
                     }
                 },
@@ -138,6 +105,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
                 .padding(horizontal = 16.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // عنوان فید
             Text(
                 text = feed.title,
                 fontSize = 26.sp,
@@ -193,6 +161,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // کد فید و دکمه کپی
             Card(
                 colors = CardDefaults.cardColors(containerColor = SurfaceDark),
                 shape = RoundedCornerShape(8.dp),
@@ -217,7 +186,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
                             Toast.makeText(context, "کل اطلاعات کپی شد!", Toast.LENGTH_SHORT).show()
                         }
                     ) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy", tint = MaterialTheme.colorScheme.primary)
+                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy All", tint = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
@@ -226,6 +195,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
             Text(text = feed.datetime, fontSize = 16.sp, color = TextGray)
 
+            // بخش Match Info
             if (feed.event.isNotBlank()) {
                 Spacer(modifier = Modifier.height(24.dp))
                 Card(
@@ -257,6 +227,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // لوگو
             Image(
                 painter = painterResource(id = logoResId),
                 contentDescription = "Logo",
@@ -265,6 +236,36 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
             )
 
             Spacer(modifier = Modifier.weight(1f))
+
+            // دکمه‌های Prev و Next
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Button(
+                    onClick = { onPrev?.invoke() },
+                    enabled = onPrev != null,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = SurfaceDark,
+                        disabledContainerColor = SurfaceDark.copy(alpha = 0.3f)
+                    )
+                ) {
+                    Text("Prev", color = if (onPrev != null) TextWhite else TextGray)
+                }
+                
+                Button(
+                    onClick = { onNext?.invoke() },
+                    enabled = onNext != null,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = SurfaceDark,
+                        disabledContainerColor = SurfaceDark.copy(alpha = 0.3f)
+                    )
+                ) {
+                    Text("Next", color = if (onNext != null) TextWhite else TextGray)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), thickness = 1.dp)
             Spacer(modifier = Modifier.height(16.dp))
