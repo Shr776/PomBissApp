@@ -3,46 +3,26 @@ package com.pombiss.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.pombiss.app.data.Feed
 import com.pombiss.app.data.FeedRepository
 import com.pombiss.app.data.LicenseManager
 import com.pombiss.app.ui.screens.*
 import com.pombiss.app.ui.theme.*
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             val context = LocalContext.current
-            
             var currentTheme by remember { mutableStateOf(ThemeManager.getSelectedTheme(context)) }
-            
-            // وضعیت‌های باز شدن صفحات
             var showSettings by remember { mutableStateOf(false) }
-            var showProfileEdit by remember { mutableStateOf(false) }
 
             PomBissTheme(
                 primaryColor = currentTheme.primary,
                 accentColor = currentTheme.accent
             ) {
-                // اگر صفحه ویرایش پروفایل باز بود
-                if (showProfileEdit) {
-                    ProfileEditScreen(
-                        onBack = { showProfileEdit = false }
-                    )
-                    return@PomBissTheme
-                }
-
-                // اگر صفحه تنظیمات باز بود
                 if (showSettings) {
                     SettingsScreen(
                         currentThemeId = currentTheme.id,
@@ -50,57 +30,38 @@ class MainActivity : ComponentActivity() {
                             ThemeManager.saveTheme(context, themeId)
                             currentTheme = ThemeManager.getSelectedTheme(context)
                         },
-                        onEditProfileClick = { 
-                            showSettings = false
-                            showProfileEdit = true 
-                        },
                         onBack = { showSettings = false }
                     )
                     return@PomBissTheme
                 }
 
                 var appState by remember { mutableStateOf(3) }
-                var selectedFeed by remember { mutableStateOf<Feed?>(null) }
+                var selectedFeedList by remember { mutableStateOf<List<Feed>>(emptyList()) }
+                var currentIndex by remember { mutableStateOf(-1) }
                 val repository = remember { FeedRepository(applicationContext) }
 
                 LaunchedEffect(Unit) {
                     if (LicenseManager.isActivated(context)) {
-                        val isStillActive = LicenseManager.checkUserStatus(context)
-                        if (isStillActive) {
-                            appState = 2
-                        } else {
-                            appState = 1
-                        }
+                        appState = 2
                     } else {
                         appState = 0
                     }
                 }
 
                 when (appState) {
-                    3 -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize().background(DarkBackground),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(color = currentTheme.primary)
-                        }
-                    }
+                    3 -> { /* لودینگ */ }
                     0 -> {
                         LoginScreen(
                             onLoginSuccess = {
                                 LicenseManager.saveActivation(applicationContext, true)
                                 appState = 2
                             },
-                            onGoToRegister = {
-                                appState = 4 
-                            }
+                            onGoToRegister = { appState = 4 }
                         )
                     }
                     4 -> {
                         RegistrationScreen(
-                            onRegistrationSuccess = {
-                                appState = 1 
-                            }
+                            onRegistrationSuccess = { appState = 1 }
                         )
                     }
                     1 -> {
@@ -112,18 +73,39 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     2 -> {
-                        if (selectedFeed == null) {
+                        if (currentIndex == -1) {
                             FeedListScreen(
                                 repository = repository,
-                                onFeedClick = { feed -> selectedFeed = feed },
+                                onFeedClickWithIndex = { feed, index, fullList ->
+                                    selectedFeedList = fullList
+                                    currentIndex = index
+                                },
                                 onSettingsClick = { showSettings = true }
                             )
-                        } else {
+                        }
+                    }
+                    5 -> {
+                        if (currentIndex in selectedFeedList.indices) {
                             FeedDetailScreen(
-                                feed = selectedFeed!!,
-                                onBack = { selectedFeed = null }
+                                feed = selectedFeedList[currentIndex],
+                                onBack = { currentIndex = -1 },
+                                onNext = if (currentIndex < selectedFeedList.size - 1) {
+                                    { currentIndex++ }
+                                } else null,
+                                onPrev = if (currentIndex > 0) {
+                                    { currentIndex-- }
+                                } else null
                             )
                         }
+                    }
+                }
+                
+                // مدیریت وضعیت برای رفتن به صفحه جزئیات
+                LaunchedEffect(currentIndex) {
+                    if (currentIndex != -1) {
+                        appState = 5
+                    } else {
+                        appState = 2
                     }
                 }
             }
