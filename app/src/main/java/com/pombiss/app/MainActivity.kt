@@ -81,6 +81,7 @@ class MainActivity : ComponentActivity() {
                                     currentIndex = index
                                 },
                                 onSettingsClick = { showSettings = true }
+                                // اینجا دیگه هیچ خبری از onEditProfileClick نیست
                             )
                         }
                     }
