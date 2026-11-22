@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun FeedListScreen(
     repository: FeedRepository,
-    onFeedClickWithIndex: (Feed, Int, List<Feed>) -> Unit, // پارامتر جدید برای ارسال لیست و ایندکس
+    onFeedClickWithIndex: (Feed, Int, List<Feed>) -> Unit,
     onSettingsClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -179,7 +179,6 @@ fun FeedListScreen(
                                     favoriteIds = FavoritesManager.getFavorites(context)
                                 },
                                 onClick = { 
-                                    // اینجا لیست کامل و ایندکس رو می‌فرستیم
                                     onFeedClickWithIndex(feed, index, displayedFeeds) 
                                 }
                             )
