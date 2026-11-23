@@ -29,7 +29,6 @@ import java.util.Locale
 @Composable
 fun HeaderBar(
     feedCount: Int,
-    lastUpdateText: String, // پارامتر جدید برای ساعت آپدیت
     onRefreshClick: () -> Unit,
     onSearchClick: () -> Unit,
     onSettingsClick: () -> Unit,
@@ -53,7 +52,6 @@ fun HeaderBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // سمت چپ: باکس پروفایل کاربر
             Column(
                 modifier = Modifier
                     .background(SurfaceDark, RoundedCornerShape(8.dp))
@@ -73,7 +71,6 @@ fun HeaderBar(
                 )
             }
 
-            // وسط: لوگوی برنامه
             AsyncImage(
                 model = "https://raw.githubusercontent.com/Shr776/PomBiss/main/picon/PomBiss_logo.png",
                 contentDescription = "PomBiss Logo",
@@ -83,7 +80,6 @@ fun HeaderBar(
                     .width(110.dp)
             )
 
-            // سمت راست: ساعت و تاریخ
             Column(horizontalAlignment = Alignment.End) {
                 Text(
                     text = currentTime, 
@@ -102,19 +98,11 @@ fun HeaderBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                Text(
-                    text = "$feedCount feeds",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.secondary 
-                )
-                // نمایش ساعت آپدیت
-                Text(
-                    text = "Updated: $lastUpdateText",
-                    fontSize = 10.sp,
-                    color = TextGray
-                )
-            }
+            Text(
+                text = "$feedCount feeds",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.secondary 
+            )
 
             Row {
                 IconButton(onClick = onToggleFavoriteView) {
