@@ -6,8 +6,6 @@ object FeedParser {
 
     private val TEAMS_RE = Pattern.compile("\\s+(?:vs\\.?|v)\\s+", Pattern.CASE_INSENSITIVE)
     private val DATE_RE = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}")
-
-    // فیلدهایی که ممکنه اسم تیم‌ها توشون باشه
     private val EVENT_FIELDS = intArrayOf(6, 7)
 
     fun parseLine(line: String): Feed? {
@@ -65,9 +63,7 @@ object FeedParser {
         val type = parts.getOrNull(4) ?: ""
         val feedId = parts.getOrNull(5) ?: ""
         
-        // --- منطق جدید برای پیدا کردن اسم تیم‌ها ---
         val event = pickEvent(parts)
-        // -------------------------------------------
 
         val datetime = parts.lastOrNull { it.contains("-") && it.contains(":") } ?: ""
 
@@ -97,7 +93,6 @@ object FeedParser {
                 }
             }
         }
-        // اولویت به فیلدی که اسم دو تیم رو داره
         for (v in candidates) {
             if (TEAMS_RE.matcher(v).find()) {
                 return v
