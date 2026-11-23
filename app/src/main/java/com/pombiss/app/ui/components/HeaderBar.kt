@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -39,6 +40,7 @@ fun HeaderBar(
     val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
     val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
     
+    // گرفتن اسم کاربر و کد کشور از حافظه
     val username = LicenseManager.getUsername(context)
     val countryCode = LicenseManager.getCountryCode(context)
 
@@ -47,11 +49,13 @@ fun HeaderBar(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
+        // ردیف اول: اسم کاربر (چپ)، لوگو (وسط)، ساعت (راست)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // سمت چپ: باکس پروفایل کاربر
             Column(
                 modifier = Modifier
                     .background(SurfaceDark, RoundedCornerShape(8.dp))
@@ -65,12 +69,13 @@ fun HeaderBar(
                     color = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = countryCode,
+                    text = countryCode, // نمایش کد کشور (مثلا IR)
                     fontSize = 11.sp,
                     color = TextGray
                 )
             }
 
+            // وسط: لوگوی برنامه
             AsyncImage(
                 model = "https://raw.githubusercontent.com/Shr776/PomBiss/main/picon/PomBiss_logo.png",
                 contentDescription = "PomBiss Logo",
@@ -80,6 +85,7 @@ fun HeaderBar(
                     .width(110.dp)
             )
 
+            // سمت راست: ساعت و تاریخ
             Column(horizontalAlignment = Alignment.End) {
                 Text(
                     text = currentTime, 
@@ -93,6 +99,7 @@ fun HeaderBar(
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        // ردیف دوم: تعداد فیدها و دکمه‌ها
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
