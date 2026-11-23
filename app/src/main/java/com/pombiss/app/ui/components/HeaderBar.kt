@@ -1,10 +1,7 @@
 package com.pombiss.app.ui.components
 
-import android.graphics.BitmapFactory
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
@@ -14,11 +11,9 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -27,7 +22,6 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.pombiss.app.data.LicenseManager
 import com.pombiss.app.ui.theme.*
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -35,6 +29,7 @@ import java.util.Locale
 @Composable
 fun HeaderBar(
     feedCount: Int,
+    lastUpdateText: String, // پارامتر جدید برای ساعت آپدیت
     onRefreshClick: () -> Unit,
     onSearchClick: () -> Unit,
     onSettingsClick: () -> Unit,
@@ -48,14 +43,6 @@ fun HeaderBar(
     val username = LicenseManager.getUsername(context)
     val countryCode = LicenseManager.getCountryCode(context)
 
-    // لود کردن عکس پروفایل از حافظه
-    val profilePic = remember {
-        val file = File(context.filesDir, "profile_pic.jpg")
-        if (file.exists()) {
-            BitmapFactory.decodeFile(file.absolutePath)?.asImageBitmap()
-        } else null
-    }
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -66,47 +53,24 @@ fun HeaderBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // سمت چپ: پروفایل کاربر (عکس + اسم + کد کشور)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                // نمایش عکس پروفایل
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(SurfaceDark, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (profilePic != null) {
-                        Image(
-                            bitmap = profilePic,
-                            contentDescription = "Profile",
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        Text(
-                            text = username.take(1).uppercase(),
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-                
-                Spacer(modifier = Modifier.width(8.dp))
-                
-                Column(horizontalAlignment = Alignment.Start) {
-                    Text(
-                        text = "@$username",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = countryCode,
-                        fontSize = 10.sp,
-                        color = TextGray
-                    )
-                }
+            // سمت چپ: باکس پروفایل کاربر
+            Column(
+                modifier = Modifier
+                    .background(SurfaceDark, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "@$username",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = countryCode,
+                    fontSize = 11.sp,
+                    color = TextGray
+                )
             }
 
             // وسط: لوگوی برنامه
@@ -116,7 +80,7 @@ fun HeaderBar(
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .height(40.dp)
-                    .width(100.dp)
+                    .width(110.dp)
             )
 
             // سمت راست: ساعت و تاریخ
@@ -138,11 +102,19 @@ fun HeaderBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "$feedCount feeds",
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.secondary 
-            )
+            Column {
+                Text(
+                    text = "$feedCount feeds",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.secondary 
+                )
+                // نمایش ساعت آپدیت
+                Text(
+                    text = "Updated: $lastUpdateText",
+                    fontSize = 10.sp,
+                    color = TextGray
+                )
+            }
 
             Row {
                 IconButton(onClick = onToggleFavoriteView) {
