@@ -105,7 +105,6 @@ fun FeedDetailScreen(
                 .padding(horizontal = 16.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // عنوان فید
             Text(
                 text = feed.title,
                 fontSize = 26.sp,
@@ -161,7 +160,6 @@ fun FeedDetailScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // کد فید و دکمه کپی
             Card(
                 colors = CardDefaults.cardColors(containerColor = SurfaceDark),
                 shape = RoundedCornerShape(8.dp),
@@ -195,7 +193,6 @@ fun FeedDetailScreen(
 
             Text(text = feed.datetime, fontSize = 16.sp, color = TextGray)
 
-            // بخش Match Info
             if (feed.event.isNotBlank()) {
                 Spacer(modifier = Modifier.height(24.dp))
                 Card(
@@ -227,7 +224,6 @@ fun FeedDetailScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // لوگو
             Image(
                 painter = painterResource(id = logoResId),
                 contentDescription = "Logo",
