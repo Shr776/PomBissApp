@@ -26,15 +26,12 @@ import com.pombiss.app.ui.components.FeedCard
 import com.pombiss.app.ui.components.HeaderBar
 import com.pombiss.app.ui.theme.*
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedListScreen(
     repository: FeedRepository,
-    onFeedClickWithIndex: (Feed, Int, List<Feed>) -> Unit,
+    onFeedClick: (Feed) -> Unit,
     onSettingsClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -47,7 +44,6 @@ fun FeedListScreen(
     
     var showFavoritesOnly by remember { mutableStateOf(false) }
     var favoriteIds by remember { mutableStateOf(FavoritesManager.getFavorites(context)) }
-    var lastUpdateText by remember { mutableStateOf("...") }
 
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -65,7 +61,6 @@ fun FeedListScreen(
             try {
                 val newFeeds = repository.getFeeds(forceRefresh = force)
                 feeds = newFeeds
-                lastUpdateText = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
                 
                 val currentFeedIds = newFeeds.map { "${it.freq}_${it.pol}_${it.sr}_${it.datetime}".replace(" ", "") }.toSet()
                 val currentFavorites = FavoritesManager.getFavorites(context).toMutableSet()
@@ -113,7 +108,6 @@ fun FeedListScreen(
         Column(modifier = Modifier.fillMaxSize()) {
             HeaderBar(
                 feedCount = displayedFeeds.size,
-                lastUpdateText = lastUpdateText,
                 onRefreshClick = { loadFeeds(true) },
                 onSearchClick = { 
                     showSearchBar = !showSearchBar 
@@ -184,9 +178,7 @@ fun FeedListScreen(
                                     FavoritesManager.toggleFavorite(context, feed)
                                     favoriteIds = FavoritesManager.getFavorites(context)
                                 },
-                                onClick = { 
-                                    onFeedClickWithIndex(feed, index, displayedFeeds) 
-                                }
+                                onClick = { onFeedClick(feed) }
                             )
                         }
                         
