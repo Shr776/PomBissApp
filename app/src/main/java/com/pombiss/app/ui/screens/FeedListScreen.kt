@@ -45,12 +45,14 @@ fun FeedListScreen(
     var showFavoritesOnly by remember { mutableStateOf(false) }
     var favoriteIds by remember { mutableStateOf(FavoritesManager.getFavorites(context)) }
 
+    // حفظ موقعیت اسکرول
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
+    // چک کردن اینکه کاربر از بالای صفحه فاصله گرفته یا نه (برای نمایش دکمه شناور)
     val showScrollToTopButton by remember {
         derivedStateOf {
-            listState.firstVisibleItemIndex > 3
+            listState.firstVisibleItemIndex > 3 // اگه از فید ۴ به بعد جلوتر رفتیم، دکمه رو نشون بده
         }
     }
 
@@ -103,6 +105,7 @@ fun FeedListScreen(
         searchedFeeds
     }
 
+    // استفاده از Box برای اینکه دکمه شناور روی لیست بیاد
     Box(modifier = Modifier.fillMaxSize().background(DarkBackground)) {
         
         Column(modifier = Modifier.fillMaxSize()) {
@@ -166,7 +169,7 @@ fun FeedListScreen(
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 80.dp)
+                        contentPadding = PaddingValues(bottom = 80.dp) // فاصله برای اینکه دکمه شناور روی فید آخر نیفته
                     ) {
                         itemsIndexed(displayedFeeds) { index, feed ->
                             val uniqueId = "${feed.freq}_${feed.pol}_${feed.sr}_${feed.datetime}".replace(" ", "")
@@ -197,6 +200,7 @@ fun FeedListScreen(
             }
         }
 
+        // دکمه شناور اسکرول به بالا
         AnimatedVisibility(
             visible = showScrollToTopButton,
             enter = fadeIn(),
@@ -208,7 +212,7 @@ fun FeedListScreen(
             FloatingActionButton(
                 onClick = {
                     scope.launch {
-                        listState.animateScrollToItem(0)
+                        listState.animateScrollToItem(0) // اسکرول نرم به اول لیست
                     }
                 },
                 containerColor = MaterialTheme.colorScheme.primary,
