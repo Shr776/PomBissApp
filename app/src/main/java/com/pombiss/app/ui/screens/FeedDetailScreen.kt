@@ -3,7 +3,6 @@ package com.pombiss.app.ui.screens
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -12,7 +11,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -72,20 +70,6 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = TextWhite)
-                    }
-                },
-                actions = {
-                    IconButton(
-                        onClick = {
-                            val shareIntent = Intent().apply {
-                                action = Intent.ACTION_SEND
-                                putExtra(Intent.EXTRA_TEXT, feed.toShareString())
-                                type = "text/plain"
-                            }
-                            context.startActivity(Intent.createChooser(shareIntent, "Share Feed via..."))
-                        }
-                    ) {
-                        Icon(Icons.Default.Share, contentDescription = "Share", tint = TextWhite)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkBackground)
@@ -155,6 +139,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // کپی کامل مشخصات (نه فقط کد)
             Card(
                 colors = CardDefaults.cardColors(containerColor = SurfaceDark),
                 shape = RoundedCornerShape(8.dp),
@@ -173,6 +158,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
                     Spacer(modifier = Modifier.width(12.dp))
                     IconButton(
                         onClick = {
+                            // حالا کل اطلاعات کپی میشه (هماهنگ با صفحه لیست)
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                             val clip = ClipData.newPlainText("Feed Info", feed.toShareString())
                             clipboard.setPrimaryClip(clip)
@@ -219,6 +205,7 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // لوگوی بزرگ‌تر (از 100 به 140)
             Image(
                 painter = painterResource(id = logoResId),
                 contentDescription = "Logo",
