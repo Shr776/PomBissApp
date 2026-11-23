@@ -30,12 +30,7 @@ import com.pombiss.app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FeedDetailScreen(
-    feed: Feed, 
-    onBack: () -> Unit,
-    onNext: (() -> Unit)? = null,
-    onPrev: (() -> Unit)? = null
-) {
+fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
     val context = LocalContext.current
 
     val logoResId = when {
@@ -232,36 +227,6 @@ fun FeedDetailScreen(
             )
 
             Spacer(modifier = Modifier.weight(1f))
-
-            // دکمه‌های Prev و Next
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Button(
-                    onClick = { onPrev?.invoke() },
-                    enabled = onPrev != null,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = SurfaceDark,
-                        disabledContainerColor = SurfaceDark.copy(alpha = 0.3f)
-                    )
-                ) {
-                    Text("Prev", color = if (onPrev != null) TextWhite else TextGray)
-                }
-                
-                Button(
-                    onClick = { onNext?.invoke() },
-                    enabled = onNext != null,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = SurfaceDark,
-                        disabledContainerColor = SurfaceDark.copy(alpha = 0.3f)
-                    )
-                ) {
-                    Text("Next", color = if (onNext != null) TextWhite else TextGray)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), thickness = 1.dp)
             Spacer(modifier = Modifier.height(16.dp))
