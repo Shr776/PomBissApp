@@ -36,8 +36,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 var appState by remember { mutableStateOf(3) }
-                var selectedFeedList by remember { mutableStateOf<List<Feed>>(emptyList()) }
-                var currentIndex by remember { mutableStateOf(-1) }
+                var selectedFeed by remember { mutableStateOf<Feed?>(null) }
                 val repository = remember { FeedRepository(applicationContext) }
 
                 LaunchedEffect(Unit) {
@@ -73,38 +72,18 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     2 -> {
-                        if (currentIndex == -1) {
+                        if (selectedFeed == null) {
                             FeedListScreen(
                                 repository = repository,
-                                onFeedClickWithIndex = { feed, index, fullList ->
-                                    selectedFeedList = fullList
-                                    currentIndex = index
-                                },
+                                onFeedClick = { feed -> selectedFeed = feed },
                                 onSettingsClick = { showSettings = true }
                             )
-                        }
-                    }
-                    5 -> {
-                        if (currentIndex in selectedFeedList.indices) {
+                        } else {
                             FeedDetailScreen(
-                                feed = selectedFeedList[currentIndex],
-                                onBack = { currentIndex = -1 },
-                                onNext = if (currentIndex < selectedFeedList.size - 1) {
-                                    { currentIndex++ }
-                                } else null,
-                                onPrev = if (currentIndex > 0) {
-                                    { currentIndex-- }
-                                } else null
+                                feed = selectedFeed!!,
+                                onBack = { selectedFeed = null }
                             )
                         }
-                    }
-                }
-                
-                LaunchedEffect(currentIndex) {
-                    if (currentIndex != -1) {
-                        appState = 5
-                    } else {
-                        appState = 2
                     }
                 }
             }
