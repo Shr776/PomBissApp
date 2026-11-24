@@ -3,6 +3,7 @@ package com.pombiss.app.ui.components
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.*
@@ -24,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pombiss.app.data.Feed
+import com.pombiss.app.data.LicenseManager
 import com.pombiss.app.ui.theme.*
 
 @Composable
@@ -35,6 +38,8 @@ fun FeedCard(
     onClick: () -> Unit
 ) {
     val context = LocalContext.current
+    val username = LicenseManager.getUsername(context)
+    val isAdmin = username.equals("Shr776", ignoreCase = true) // شرط ادمین بودن
 
     Card(
         modifier = Modifier
@@ -106,6 +111,25 @@ fun FeedCard(
                         modifier = Modifier.size(24.dp)
                     ) {
                         Icon(Icons.Default.ContentCopy, contentDescription = "Copy", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                    }
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    // دکمه اشتراک‌گذاری (فقط برای ادمین)
+                    if (isAdmin) {
+                        IconButton(
+                            onClick = {
+                                val shareIntent = Intent().apply {
+                                    action = Intent.ACTION_SEND
+                                    putExtra(Intent.EXTRA_TEXT, feed.toShareString())
+                                    type = "text/plain"
+                                }
+                                context.startActivity(Intent.createChooser(shareIntent, "Share Feed via..."))
+                            },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(Icons.Default.Share, contentDescription = "Share", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                        }
                     }
                 }
                 
