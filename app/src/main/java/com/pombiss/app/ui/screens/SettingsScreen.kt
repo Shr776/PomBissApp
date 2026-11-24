@@ -10,7 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,7 +24,6 @@ import com.pombiss.app.ui.theme.*
 fun SettingsScreen(
     currentThemeId: String,
     onThemeSelected: (String) -> Unit,
-    onEditProfileClick: () -> Unit,
     onBack: () -> Unit
 ) {
     Scaffold(
@@ -49,28 +47,6 @@ fun SettingsScreen(
                 .padding(horizontal = 16.dp),
             contentPadding = PaddingValues(vertical = 16.dp)
         ) {
-            // گزینه ویرایش پروفایل
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 6.dp)
-                        .clickable { onEditProfileClick() },
-                    colors = CardDefaults.cardColors(containerColor = SurfaceDark),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(Icons.Default.Person, contentDescription = "Profile", tint = MaterialTheme.colorScheme.primary)
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text("Edit Profile (Name, Password)", fontSize = 16.sp, color = TextWhite)
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
             item {
                 Text(
                     text = "Select Theme Color",
