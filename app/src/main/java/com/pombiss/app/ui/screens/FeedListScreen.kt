@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun FeedListScreen(
     repository: FeedRepository,
-    onFeedClick: (Feed) -> Unit,
+    onFeedClick: (List<Feed>, Int) -> Unit,
     onSettingsClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -178,7 +178,7 @@ fun FeedListScreen(
                                     FavoritesManager.toggleFavorite(context, feed)
                                     favoriteIds = FavoritesManager.getFavorites(context)
                                 },
-                                onClick = { onFeedClick(feed) }
+                                onClick = { onFeedClick(displayedFeeds, index) }
                             )
                         }
                         
