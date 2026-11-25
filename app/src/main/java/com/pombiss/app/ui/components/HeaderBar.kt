@@ -29,6 +29,8 @@ import java.util.Locale
 @Composable
 fun HeaderBar(
     feedCount: Int,
+    lastUpdateText: String,
+    nextUpdateText: String,
     onRefreshClick: () -> Unit,
     onSearchClick: () -> Unit,
     onSettingsClick: () -> Unit,
@@ -47,6 +49,7 @@ fun HeaderBar(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
+        // ردیف اول: پروفایل (چپ) | لوگو (وسط) | ساعت (راست)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -91,8 +94,23 @@ fun HeaderBar(
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
+        // ردیف دوم: ساعت آپدیت و آپدیت بعدی (اضافه شد)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "آخرین آپدیت: $lastUpdateText  |  آپدیت بعدی: $nextUpdateText",
+                fontSize = 11.sp,
+                color = TextGray
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // ردیف سوم: تعداد فیدها و دکمه‌ها
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
