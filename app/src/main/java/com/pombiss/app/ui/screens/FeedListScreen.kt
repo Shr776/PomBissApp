@@ -26,16 +26,12 @@ import com.pombiss.app.ui.components.FeedCard
 import com.pombiss.app.ui.components.HeaderBar
 import com.pombiss.app.ui.theme.*
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedListScreen(
     repository: FeedRepository,
-    onFeedClick: (Feed) -> Unit,
+    onFeedClick: (List<Feed>, Int) -> Unit,
     onSettingsClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -49,31 +45,12 @@ fun FeedListScreen(
     var showFavoritesOnly by remember { mutableStateOf(false) }
     var favoriteIds by remember { mutableStateOf(FavoritesManager.getFavorites(context)) }
 
-    // ساعت آخرین آپدیت
-    var lastUpdateText by remember { mutableStateOf("...") }
-    // زمان باقی‌مانده تا آپدیت بعدی
-    var nextUpdateText by remember { mutableStateOf("...") }
-
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
     val showScrollToTopButton by remember {
         derivedStateOf {
             listState.firstVisibleItemIndex > 3
-        }
-    }
-
-    // تابع محاسبه زمان باقی‌مانده تا ساعت بعدی
-    fun calculateNextUpdate() {
-        val calendar = Calendar.getInstance()
-        val minutes = calendar.get(Calendar.MINUTE)
-        val seconds = calendar.get(Calendar.SECOND)
-        val remainingMinutes = 59 - minutes
-        val remainingSeconds = 60 - seconds
-        if (remainingMinutes == 0) {
-            nextUpdateText = "${remainingSeconds} ثانیه"
-        } else {
-            nextUpdateText = "${remainingMinutes} دقیقه"
         }
     }
 
@@ -84,10 +61,6 @@ fun FeedListScreen(
             try {
                 val newFeeds = repository.getFeeds(forceRefresh = force)
                 feeds = newFeeds
-                
-                // ثبت ساعت آخرین آپدیت
-                lastUpdateText = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
-                calculateNextUpdate()
                 
                 val currentFeedIds = newFeeds.map { "${it.freq}_${it.pol}_${it.sr}_${it.datetime}".replace(" ", "") }.toSet()
                 val currentFavorites = FavoritesManager.getFavorites(context).toMutableSet()
@@ -108,11 +81,6 @@ fun FeedListScreen(
 
     LaunchedEffect(Unit) {
         loadFeeds(false)
-        // هر ۱۰ ثانیه زمان باقی‌مانده رو آپدیت کن
-        while (true) {
-            kotlinx.coroutines.delay(10000)
-            calculateNextUpdate()
-        }
     }
 
     val searchedFeeds = if (searchQuery.isBlank()) {
@@ -140,8 +108,6 @@ fun FeedListScreen(
         Column(modifier = Modifier.fillMaxSize()) {
             HeaderBar(
                 feedCount = displayedFeeds.size,
-                lastUpdateText = lastUpdateText,
-                nextUpdateText = nextUpdateText,
                 onRefreshClick = { loadFeeds(true) },
                 onSearchClick = { 
                     showSearchBar = !showSearchBar 
@@ -212,7 +178,7 @@ fun FeedListScreen(
                                     FavoritesManager.toggleFavorite(context, feed)
                                     favoriteIds = FavoritesManager.getFavorites(context)
                                 },
-                                onClick = { onFeedClick(feed) }
+                                onClick = { onFeedClick(displayedFeeds, index) }
                             )
                         }
                         
