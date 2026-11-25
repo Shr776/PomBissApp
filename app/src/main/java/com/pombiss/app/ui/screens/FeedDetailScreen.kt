@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
@@ -30,7 +31,14 @@ import com.pombiss.app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
+fun FeedDetailScreen(
+    feed: Feed,
+    onBack: () -> Unit,
+    canGoPrevious: Boolean,
+    canGoNext: Boolean,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit
+) {
     val context = LocalContext.current
 
     val logoResId = when {
@@ -75,6 +83,26 @@ fun FeedDetailScreen(feed: Feed, onBack: () -> Unit) {
                     }
                 },
                 actions = {
+                    IconButton(
+                        onClick = onPrevious,
+                        enabled = canGoPrevious
+                    ) {
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Previous Feed",
+                            tint = if (canGoPrevious) TextWhite else TextGray.copy(alpha = 0.35f)
+                        )
+                    }
+                    IconButton(
+                        onClick = onNext,
+                        enabled = canGoNext
+                    ) {
+                        Icon(
+                            Icons.Default.ArrowForward,
+                            contentDescription = "Next Feed",
+                            tint = if (canGoNext) TextWhite else TextGray.copy(alpha = 0.35f)
+                        )
+                    }
                     IconButton(
                         onClick = {
                             val shareIntent = Intent().apply {
