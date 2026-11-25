@@ -37,8 +37,6 @@ class MainActivity : ComponentActivity() {
 
                 var appState by remember { mutableStateOf(3) }
                 var selectedFeed by remember { mutableStateOf<Feed?>(null) }
-                var selectedFeedList by remember { mutableStateOf<List<Feed>>(emptyList()) }
-                var selectedFeedIndex by remember { mutableIntStateOf(-1) }
                 val repository = remember { FeedRepository(applicationContext) }
 
                 LaunchedEffect(Unit) {
@@ -77,31 +75,13 @@ class MainActivity : ComponentActivity() {
                         if (selectedFeed == null) {
                             FeedListScreen(
                                 repository = repository,
-                                onFeedClick = { feedList, index ->
-                                    selectedFeedList = feedList
-                                    selectedFeedIndex = index
-                                    selectedFeed = feedList.getOrNull(index)
-                                },
+                                onFeedClick = { feed -> selectedFeed = feed }, // اینجا اصلاح شد
                                 onSettingsClick = { showSettings = true }
                             )
                         } else {
                             FeedDetailScreen(
                                 feed = selectedFeed!!,
-                                onBack = { selectedFeed = null },
-                                canGoPrevious = selectedFeedIndex > 0,
-                                canGoNext = selectedFeedIndex in 0 until selectedFeedList.lastIndex,
-                                onPrevious = {
-                                    if (selectedFeedIndex > 0) {
-                                        selectedFeedIndex -= 1
-                                        selectedFeed = selectedFeedList[selectedFeedIndex]
-                                    }
-                                },
-                                onNext = {
-                                    if (selectedFeedIndex < selectedFeedList.lastIndex) {
-                                        selectedFeedIndex += 1
-                                        selectedFeed = selectedFeedList[selectedFeedIndex]
-                                    }
-                                }
+                                onBack = { selectedFeed = null }
                             )
                         }
                     }
